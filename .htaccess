@@ -1,0 +1,23 @@
+# Fallback for deployments where the webserver's document root points at this
+# project's root instead of directly at public/ (e.g. shared hosting where you
+# can't set the vhost's DocumentRoot yourself). If your webserver is already
+# configured with DocumentRoot pointing at public/ (recommended, see
+# README.md), this file sits outside the document root, Apache never reads
+# it, and public/.htaccess handles everything on its own.
+
+# Never list directory contents at this level.
+Options -Indexes
+
+# Deny direct access to dotfiles (.env, .env.example, .git*, ...).
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+RewriteEngine On
+
+# Anything not already targeting public/ (static assets under it, or an
+# already-rewritten request) is forced through the public/ front controller —
+# including files that physically exist at the project root (composer.json,
+# .env, database/migrate.php, ...), so they're never served raw.
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteRule ^(.*)$ public/$1 [L]

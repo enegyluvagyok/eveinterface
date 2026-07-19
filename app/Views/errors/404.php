@@ -1,0 +1,1 @@
+<?php $title = '404'; require dirname(__DIR__) . '/layouts/header.php'; ?><h1 class="text-4xl font-bold">404</h1><p class="mt-4 text-slate-300"><?= t('errors.404_desc') ?></p><?php require dirname(__DIR__) . '/layouts/footer.php'; ?>

@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS subcontractors (
+    id INT UNSIGNED PRIMARY KEY,
+    name VARCHAR(191) NOT NULL UNIQUE,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

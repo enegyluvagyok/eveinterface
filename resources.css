@@ -1,0 +1,25 @@
+@import "tailwindcss";
+@source "./app/Views/**/*.php";
+
+@theme {
+  --color-brand-red: #e2231a;
+  --color-brand-red-dark: #a81810;
+  --color-brand-gold: #f5a623;
+  --color-brand-ink: #1a1b1d;
+  --color-brand-ink-light: #35383c;
+  --color-brand-panel: #232527;
+  --color-brand-panel-strong: #2c2f32;
+}
+
+#page-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  opacity: 0;
+  background: linear-gradient(90deg, var(--color-brand-red), var(--color-brand-gold));
+  z-index: 9999;
+  transition: width 0.2s ease, opacity 0.2s ease;
+  box-shadow: 0 0 8px 0 var(--color-brand-gold);
+}

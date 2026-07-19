@@ -1,0 +1,1 @@
+<?php $title = '500'; require dirname(__DIR__) . '/layouts/header.php'; ?><h1 class="text-4xl font-bold">500</h1><p class="mt-4 text-slate-300"><?= t('errors.500_desc') ?></p><?php require dirname(__DIR__) . '/layouts/footer.php'; ?>

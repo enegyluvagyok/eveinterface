@@ -1,0 +1,1 @@
+<?php $title = '403'; require dirname(__DIR__) . '/layouts/header.php'; ?><h1 class="text-4xl font-bold">403</h1><p class="mt-4 text-slate-300"><?= $message ?? t('errors.403_desc') ?></p><?php require dirname(__DIR__) . '/layouts/footer.php'; ?>

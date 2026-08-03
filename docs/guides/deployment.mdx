@@ -1,0 +1,45 @@
+---
+title: "Éles üzemeltetés"
+description: "Checklist a produkciós telepítéshez"
+---
+
+<Steps>
+  <Step title="Document root">
+    A webszerver document root-ja **kizárólag** a `public/` könyvtár legyen. Az `app/`, `config/`, `database/`, `storage/`, `vendor/` mappák nem lehetnek közvetlenül HTTP-n elérhetők.
+  </Step>
+  <Step title="Környezeti beállítások">
+    ```bash
+    APP_ENV=production
+    APP_DEBUG=false
+    SESSION_SECURE=true
+    ```
+    HTTPS kötelező, ha `SESSION_SECURE=true` — enélkül a böngésző eldobja a session cookie-t.
+  </Step>
+  <Step title="Titkok">
+    `APP_KEY` és `JWT_SECRET` egymástól **különálló**, legalább 32 bájtos, kriptográfiailag véletlen string legyen (pl. `openssl rand -base64 32`).
+  </Step>
+  <Step title="Írási jogosultságok">
+    A `storage/` könyvtárnak (sessions, cache, uploads) írhatónak kell lennie a PHP-t futtató felhasználó számára, de **nem lehet publikusan elérhető** a webszerveren keresztül.
+  </Step>
+  <Step title="Build és migráció">
+    ```bash
+    composer install --no-dev --optimize-autoloader
+    npm ci && npm run build
+    composer migrate
+    ```
+  </Step>
+</Steps>
+
+## Ismert skálázási korlátok
+
+- A fájlalapú rate limiter (`RateLimitMiddleware`) **egygépes** megoldás. Több PHP-FPM/webszerver példány (load balancing) esetén Redis-alapú limiterre érdemes cserélni, mert a fájlrendszeres számláló nem konzisztens párhuzamos írásoknál.
+- A JWT visszavonás nincs beépítve — tarts rövid `JWT_TTL`-t, és szükség esetén vezess be token blacklistet. Lásd [Biztonság](/guides/security).
+
+## Karbantartás
+
+```bash
+composer audit   # ismert PHP függőségi sebezhetőségek
+npm audit        # ismert JS build-eszköz sebezhetőségek
+```
+
+Futtasd ezeket rendszeresen, ideális esetben CI pipeline részeként.

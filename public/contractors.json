@@ -1,0 +1,39 @@
+[
+{"type":"header","version":"5.2.1deb3","comment":"Export to JSON plugin for PHPMyAdmin"},
+{"type":"database","name":"gewiss"},
+{"type":"table","name":"contractors","database":"gewiss","data":
+[
+{"id":"1","name":"Gewiss Guard Kft.","contact":"Lisztes Mihály","phone":"+36304640040","created_at":"2025-05-21 15:16:57","updated_at":"2026-02-11 12:43:29"},
+{"id":"3","name":"BAUER","contact":"Szigeti Ádám","phone":"70 504 3240","created_at":"2025-05-22 09:58:00","updated_at":"2025-05-22 09:58:00"},
+{"id":"4","name":"EVE","contact":"Török László","phone":"20 911 8490","created_at":"2025-05-22 09:58:35","updated_at":"2025-05-22 09:58:35"},
+{"id":"5","name":"CREC","contact":"Kundrák Milán","phone":"06203614647","created_at":"2025-05-22 09:59:14","updated_at":"2026-04-29 11:59:43"},
+{"id":"6","name":"General Force","contact":"Kondor Péter","phone":"06305093375","created_at":"2025-05-22 09:59:49","updated_at":"2026-03-26 13:12:07"},
+{"id":"7","name":"Synergy","contact":"Papp Ádám","phone":"30 542 9540","created_at":"2025-05-22 10:00:27","updated_at":"2025-05-22 10:00:27"},
+{"id":"8","name":"WHB","contact":"Veres Tibor","phone":"303125554","created_at":"2025-05-22 10:01:05","updated_at":"2025-10-21 10:00:09"},
+{"id":"9","name":"CEH+","contact":"Felföldi-Vizi Regina","phone":"20 495 5420","created_at":"2025-05-22 10:40:17","updated_at":"2025-05-22 10:40:17"},
+{"id":"10","name":"CSCEC5","contact":"Vékony Bálint","phone":"06202199922","created_at":"2025-06-06 13:10:46","updated_at":"2025-11-27 10:11:38"},
+{"id":"13","name":"Castrum Pro","contact":"Husi Zsolt","phone":null,"created_at":"2025-09-17 09:32:21","updated_at":"2025-09-17 09:32:21"},
+{"id":"11","name":"Minimax","contact":"Gaszper Adrián","phone":"06306102726","created_at":"2025-07-18 13:34:57","updated_at":"2025-11-27 10:13:20"},
+{"id":"12","name":"Hungary HUAKE","contact":"Muha Norbert","phone":"06309731983","created_at":"2025-07-23 10:01:43","updated_at":"2025-07-23 10:01:43"},
+{"id":"14","name":"EY denkstatt","contact":"Donauer Barbara","phone":"06703957772","created_at":"2025-09-29 14:00:00","updated_at":"2025-09-29 14:00:00"},
+{"id":"15","name":"Kraftszer Kft.","contact":"Pethő Tibor","phone":"06703357941","created_at":"2025-10-02 10:51:53","updated_at":"2025-10-02 10:51:53"},
+{"id":"16","name":"Chuhao","contact":"Bánszky József","phone":null,"created_at":"2025-10-28 10:05:08","updated_at":"2025-10-28 10:05:08"},
+{"id":"17","name":"Peka-Bau","contact":"Bánszky József","phone":null,"created_at":"2025-11-13 08:09:44","updated_at":"2025-11-13 08:09:44"},
+{"id":"18","name":"TSPC","contact":"Bánszky József","phone":null,"created_at":"2025-11-14 10:27:15","updated_at":"2025-11-14 10:27:15"},
+{"id":"19","name":"Nyírlift Kft.","contact":"Micah Godwin Liu","phone":null,"created_at":"2025-11-18 10:51:06","updated_at":"2025-11-18 10:51:06"},
+{"id":"20","name":"True Hope","contact":"Vékony Bálint","phone":null,"created_at":"2025-11-25 10:09:10","updated_at":"2025-11-25 10:09:10"},
+{"id":"21","name":"China Mobile","contact":"Gyönyörű József","phone":"null","created_at":"2026-01-08 10:45:01","updated_at":"2026-01-08 10:54:52"},
+{"id":"22","name":"OWOX","contact":"Bánszky József","phone":null,"created_at":"2026-01-22 14:12:32","updated_at":"2026-01-22 14:12:32"},
+{"id":"23","name":"Acis","contact":"Bánszky József","phone":null,"created_at":"2026-02-10 10:33:11","updated_at":"2026-02-10 10:33:11"},
+{"id":"24","name":"Ghibli","contact":"Bánszky József","phone":null,"created_at":"2026-02-16 10:23:51","updated_at":"2026-02-16 10:23:51"},
+{"id":"25","name":"MayAir Hungary Kft.","contact":null,"phone":null,"created_at":"2026-04-01 14:33:40","updated_at":"2026-04-01 14:33:40"},
+{"id":"26","name":"F-Home Kft","contact":"Ónadi Imre","phone":"06707759558","created_at":"2026-04-28 12:28:29","updated_at":"2026-04-28 12:28:29"},
+{"id":"27","name":"P-Terv General Kft","contact":"Somogyi Sándor","phone":"06301852387","created_at":"2026-05-04 14:09:29","updated_at":"2026-05-04 14:09:29"},
+{"id":"28","name":"Prime Intelligent Kft","contact":"Bánszky József","phone":"06205724171","created_at":"2026-05-13 13:51:51","updated_at":"2026-05-13 13:51:51"},
+{"id":"31","name":"MHH","contact":"Kék Ádám","phone":"06302813546","created_at":"2026-07-07 07:35:56","updated_at":"2026-07-07 07:35:56"},
+{"id":"30","name":"Welltech Kft","contact":"Török László","phone":"06209118490","created_at":"2026-06-02 11:29:08","updated_at":"2026-06-02 11:29:08"},
+{"id":"32","name":"Chengtuo","contact":"Szilágyi Ádám","phone":"06303619434","created_at":"2026-07-07 14:47:03","updated_at":"2026-07-07 14:47:03"},
+{"id":"33","name":"Fisher General","contact":"Szilágyi Ádám","phone":"06303619434","created_at":"2026-07-23 08:42:42","updated_at":"2026-07-23 08:42:42"}
+]
+}
+]

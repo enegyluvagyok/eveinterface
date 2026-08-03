@@ -1,0 +1,68 @@
+---
+title: "Dolgozók kezelése"
+description: "Dolgozók listázása, szűrése, rögzítése, szerkesztése és a fénykép feltöltése"
+---
+
+A **Dolgozók** menüpont (`/employees`) a beléptetésre regisztrálandó személyek nyilvántartása. Csak azokat a dolgozókat látod, akik a hozzád rendelt vállalkozóhoz/alvállalkozóhoz tartoznak — admin felhasználó mindenkit lát (lásd [Szerepkörök](/manual/overview)).
+
+## Lista, szűrés és keresés
+
+A lista tetején található szűrő űrlap az alábbi mezőket kínálja:
+
+| Mező | Hatás |
+|---|---|
+| Dátumtól / Dátumig | A rögzítés dátuma szerint szűkíti a listát |
+| Vállalkozó | Legördülő lista, csak a hozzád rendelt vállalkozók jelennek meg |
+| Alvállalkozó | Legördülő lista, csak a hozzád rendelt alvállalkozók jelennek meg |
+| Szabad szöveges keresés | Dolgozói kód, teljes név vagy személyi igazolvány szám alapján keres (részleges egyezéssel); gépelés közben korábbi értékekből javaslatokat is felkínál |
+
+A **Szűrés** gomb alkalmazza a feltételeket, a **Törlés** az összes szűrőt visszaállítja. A táblázat alján lapozó jelenik meg, ha egynél több oldalnyi találat van.
+
+A táblázat oszlopai: fénykép (bélyegkép), dolgozói kód, név, vállalkozó, alvállalkozó, személyi igazolvány szám, ki rögzítette, és állapot (lásd lent).
+
+## Állapot: rögzítve vagy importálva
+
+Minden dolgozó két állapotban lehet:
+
+<Steps>
+  <Step title="Feldolgozásra vár">
+    A dolgozó rögzítve van, de a Gewiss Gatepass szerver még nem importálta. Ilyenkor a listában **Szerkesztés** link jelenik meg, és az adatok még módosíthatók.
+  </Step>
+  <Step title="Importálva">
+    A Gatepass szerver már lekérdezte és beléptetésre kész státuszba állította a dolgozót. **Ettől kezdve az adatok nem szerkeszthetők** — a Szerkesztés link eltűnik a listából, és a szerkesztő oldal közvetlen megnyitása esetén is elutasító üzenetet kapsz.
+  </Step>
+</Steps>
+
+Ha egy már rögzített dolgozó adatait mégis módosítani kellene importálás után, ehhez a Gatepass szerver oldali folyamatot kell újraindítani — a webes felületről ez nem lehetséges (szándékos védelem az adatkonzisztencia miatt).
+
+## Új dolgozó rögzítése
+
+A **Dolgozók** oldal jobb felső sarkában lévő **Új dolgozó** gombra kattintva nyílik a rögzítő űrlap:
+
+| Mező | Megjegyzés |
+|---|---|
+| Dolgozói kód | Kötelező |
+| Teljes név | Kötelező, legalább 2 karakter |
+| Személyi igazolvány szám | Kötelező |
+| Vállalkozó | Kötelező, csak a hozzád rendelt vállalkozók közül választható |
+| Alvállalkozó | Kötelező, csak a hozzád rendelt alvállalkozók közül választható |
+| Fénykép | Opcionális, JPEG vagy PNG, legfeljebb 5 MB |
+
+A feltöltött fényképből a rendszer automatikusan egy kisebb (160 px széles) bélyegképet (avatart) is generál a listákhoz.
+
+<Warning>
+  Ha a rögzítő oldalon figyelmeztetést látsz, hogy nincs hozzárendelt vállalkozód/alvállalkozód, új dolgozót nem tudsz felvenni — kérd meg az adminisztrátort, hogy rendeljen hozzád legalább egy vállalkozót és alvállalkozót a [Felhasználók](/manual/admin) menüpontban.
+</Warning>
+
+Hibás kitöltés esetén (pl. hiányzó kötelező mező, érvénytelen vállalkozó, túl nagy vagy nem támogatott formátumú kép) a rendszer hibaüzenetet jelenít meg, és a már kitöltött mezők értékei megmaradnak — nem kell mindent újra begépelni.
+
+## Dolgozó szerkesztése
+
+A listában a **Szerkesztés** linkre kattintva (csak importálás előtt elérhető) ugyanazok a mezők szerkeszthetők, mint a rögzítéskor. A meglévő fénykép megjelenik a form tetején; új fénykép feltöltése lecseréli a régit, ha nem töltesz fel újat, a meglévő megmarad.
+
+Szerkesztés csak akkor engedélyezett, ha:
+
+- a dolgozó **még nincs importálva**, és
+- a dolgozóhoz tartozó vállalkozó **és** alvállalkozó is a te (vagy admin esetén bármelyik) hatókörödbe tartozik.
+
+Ha bármelyik feltétel nem teljesül, a rendszer `403 Hozzáférés megtagadva` oldalt jelenít meg a szerkesztő oldal megnyitásakor.

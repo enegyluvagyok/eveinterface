@@ -1,0 +1,47 @@
+---
+title: "Bevezetés"
+description: "Az EVE - Gewiss Gatepass Interface áttekintése"
+---
+
+## Mi ez az alkalmazás?
+
+Webes felület alvállalkozói kapcsolattartók számára, akik regisztrálandó személyeket (dolgozókat) rögzítenek. A rögzített adatokat a helyi **Gewiss Gatepass szerver** egy JWT-vel védett API-n keresztül tölti be, majd importként megjelöli.
+
+Az alkalmazás egy saját, keretrendszer nélküli **PHP 8.2+ MVC alap** (`starter/php-mvc-starter`), session alapú webes autentikációval és JWT alapú API autentikációval.
+
+<CardGroup cols={2}>
+  <Card title="Gyors indulás" icon="rocket" href="/quickstart">
+    Telepítés, `.env` beállítás, migrációk és seedelés.
+  </Card>
+  <Card title="Architektúra" icon="sitemap" href="/concepts/architecture">
+    A core rétegek (Router, Request/Response, View, DI konténer).
+  </Card>
+  <Card title="Gatepass API" icon="plug" href="/guides/api-integration">
+    Token igénylés, dolgozók lekérdezése, import visszaigazolása.
+  </Card>
+  <Card title="Biztonság" icon="shield" href="/guides/security">
+    CSRF, rate limit, CORS és éles üzemeltetési checklist.
+  </Card>
+</CardGroup>
+
+## Fő funkciók
+
+- **Session autentikáció** a webes felülethez (`AuthMiddleware`, `GuestMiddleware`, `AdminMiddleware`), szerepkör alapú admin/user hozzáféréssel.
+- **Kapcsolattartói hatókör (scope)**: nem admin felhasználók csak a hozzájuk rendelt vállalkozókhoz/alvállalkozókhoz tartozó dolgozókat láthatják és szerkeszthetik (`User::accessScope`).
+- **Dolgozó nyilvántartás**: fénykép feltöltéssel és automatikus avatar generálással (GD), szűréssel, lapozással és szabadszavas kereséssel.
+- **JWT API** a Gatepass szerver felé: token kérés, importálásra váró dolgozók lekérdezése, fénykép letöltés, importálás visszaigazolása.
+- **Jelszó-visszaállítás** és meghívó e-mail SMTP-n (PHPMailer) keresztül.
+- **Többnyelvűség**: magyar, angol, kínai (`hu`, `en`, `zh`), cookie alapú nyelvválasztással.
+
+## Technológiai stack
+
+| Réteg | Technológia |
+|---|---|
+| Nyelv | PHP 8.2+ |
+| Adatbázis | MySQL 8+ / MariaDB (PDO, előkészített lekérdezések) |
+| Autentikáció | PHP session (web) + JWT ([firebase/php-jwt](https://github.com/firebase/php-jwt)) |
+| E-mail | SMTP ([phpmailer/phpmailer](https://github.com/PHPMailer/PHPMailer)) |
+| Frontend | Szerveroldali PHP nézetek + Tailwind CSS 4 |
+| Webszerver | Apache `mod_rewrite`, Nginx, vagy a PHP beépített szervere |
+
+Nincs külső routing/ORM csomag: a `App\Core` névtér tartalmazza a teljes keretrendszert (kb. 10 osztály), amit a [Architektúra](/concepts/architecture) fejezet mutat be.

@@ -1,0 +1,47 @@
+---
+title: "Biztonság"
+description: "CSRF, session, JWT, rate limit, CORS és bevitel-kezelés áttekintése"
+---
+
+## Beépített védelmi rétegek
+
+| Terület | Megvalósítás |
+|---|---|
+| CSRF | Session-kötött token minden állapotváltoztató webes `POST`-on (`CsrfMiddleware`, `hash_equals`) |
+| Session cookie | `httponly`, opcionális `secure` (`SESSION_SECURE`), `samesite` (`SESSION_SAMESITE`), `session.use_strict_mode=1` |
+| Jelszó tárolás | `password_hash()`/`password_verify()` (bcrypt/argon, PHP alapértelmezés szerint), automatikus rehash bejelentkezéskor ha az algoritmus paraméterei elavultak |
+| Jelszó-visszaállító token | SHA-256 hashelve tárolva, lejárati idővel, egyszer felhasználható (`PasswordReset`) |
+| API autentikáció | Stateless JWT (HS256), külön titokkal (`JWT_SECRET` ≠ `APP_KEY`) |
+| Rate limit | Fájlalapú, IP+útvonal+időablak kulcsú számláló az API-n (`RateLimitMiddleware`) |
+| CORS | Explicit origin allowlist (`CORS_ALLOWED_ORIGINS`), nincs `*` wildcard |
+| Fájlfeltöltés | Méretkorlát (5 MB), valódi kép-tartalom ellenőrzés (`getimagesize`, csak JPEG/PNG), véletlen fájlnév (`random_bytes`) |
+| Fájl-elérés | `realpath()` + prefix-ellenőrzés a feltöltött fájlok kiszolgálásánál könyvtár-bejárás (`../`) ellen |
+| HTTP fejlécek | `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy` (`public/.htaccess`) |
+| SQL | Kizárólag előkészített (`prepare`/`execute`) lekérdezések, `PDO::ATTR_EMULATE_PREPARES => false` |
+| XSS | `e()` helper (`htmlspecialchars`, `ENT_QUOTES`) minden nézetben kiírt felhasználói adaton |
+
+## Ismert korlátok, amikre figyelni kell
+
+<AccordionGroup>
+  <Accordion title="Nincs JWT visszavonás / blacklist">
+    Egy kiadott token a lejáratáig érvényes marad, még akkor is, ha a felhasználó jelszavát megváltoztatják. Rövid `JWT_TTL`-t tarts, és ha kritikus a azonnali visszavonás, vezess be egy `jti` alapú blacklistet (pl. Redis-ben).
+  </Accordion>
+  <Accordion title="Rate limiter egygépes">
+    A fájlalapú számláló nem konzisztens több PHP-FPM worker vagy több szerver példány között versenyhelyzetben. Egy gépen (a tipikus telepítési módnál) elegendő, terheléselosztás esetén Redis-alapú megoldásra cserélendő.
+  </Accordion>
+  <Accordion title="GET /api/employees nincs felhasználói scope-hoz kötve">
+    A végpont minden importálásra váró dolgozót visszaad, nem csak a hívó felhasználóhoz rendelt vállalkozókét — lásd [Gatepass API](/guides/api-integration). Ez szándékos, mivel a Gatepass szerver egyetlen szolgáltatásfiókkal integrálódik, de érdemes tudni róla, ha több, korlátozott jogú API felhasználó jönne létre.
+  </Accordion>
+  <Accordion title="SMTP hibák némák a felhasználó felé">
+    E-mail küldési hiba csak a szerver logjában jelenik meg (`error_log`), a felhasználói folyamat sikeresen lezárul. Lásd [E-mail küldés](/guides/mail).
+  </Accordion>
+</AccordionGroup>
+
+## Rendszeres karbantartás
+
+```bash
+composer audit
+npm audit
+```
+
+Futtasd ezeket rendszeresen a függőségekben megjelenő ismert sebezhetőségek ellenőrzésére.

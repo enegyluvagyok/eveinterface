@@ -2,6 +2,8 @@
 
 Webes felület alvállalkozói kapcsolattartók számára, akik regisztrálandó személyeket rögzítenek, amit a helyi Gewiss Gatepass szerver API-n keresztül tölt be és importál. PHP 8.2+ MVC alap MySQL, SMTP, session autentikáció, JWT API, routing és Tailwind CSS támogatással.
 
+Részletes dokumentáció a [`docs/`](docs) könyvtárban található (Mint alapú), helyi megtekintéshez: `cd docs && mint dev`.
+
 ## Követelmények
 
 - PHP 8.2+ (`pdo_mysql`, `mbstring`)

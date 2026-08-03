@@ -1,0 +1,54 @@
+---
+title: "Adatmodell"
+description: "Táblák, kapcsolatok és a scope-alapú hozzáférés"
+---
+
+A séma a `database/migrations/*.sql` fájlokból épül fel sorrendben (`composer migrate` → `database/migrate.php`). Nincs ORM: minden `App\Models\*` osztály statikus metódusokból áll, amik közvetlen, előkészített PDO lekérdezéseket futtatnak `app('db')->pdo()`-n keresztül.
+
+## Táblák
+
+<Columns cols={2}>
+  <Card title="users" icon="user">
+    `id`, `name`, `email` (unique), `phone`, `password_hash`, `role` (`admin`\|`user`), `password_reset_token_hash`, `password_reset_expires_at`, időbélyegek
+  </Card>
+  <Card title="contractors" icon="building">
+    `id` (kézzel megadott `INT UNSIGNED`), `name` (unique), `contact`, `phone`, időbélyegek
+  </Card>
+  <Card title="subcontractors" icon="building-2">
+    Azonos szerkezet, mint a `contractors` — az `id` itt is a Gatepass rendszer kulcsával egyezik meg
+  </Card>
+  <Card title="employees" icon="id-card">
+    `employee_code`, `contractor_id` (FK), `subcontractor_id` (FK), `fullname`, `idcard`, `photo`, `avatar`, `created_by` (FK → `users`), `imported_at` (NULL = importálásra vár)
+  </Card>
+</Columns>
+
+`user_contractors` és `user_subcontractors` csatlótáblák (`user_id` + `contractor_id`/`subcontractor_id` összetett kulccsal, `ON DELETE CASCADE`) rendelik hozzá a nem admin felhasználókhoz az általuk látható vállalkozókat/alvállalkozókat.
+
+<Note>
+  A `contractors.id` és `subcontractors.id` **nem auto-increment** — ezeket kézzel, a Gewiss Gatepass rendszerben már létező azonosítókkal kell felvenni (`ContractorController::store`, `SubcontractorController::store`), hogy az employee rekordok importáláskor a helyes külső entitáshoz kapcsolódjanak.
+</Note>
+
+## Hozzáférési hatókör (`User::accessScope`)
+
+```php
+/** @return array{} | array{allowed_contractor_ids: int[], allowed_subcontractor_ids: int[]} üres = admin, korlátlan */
+public static function accessScope(array $user): array
+```
+
+- **Admin**: üres tömböt kap vissza → a `EmployeeModel::buildWhere()` nem alkalmaz szűrést, minden dolgozó látható.
+- **Nem admin**: a `user_contractors`/`user_subcontractors` tábla alapján kapott ID-listákkal szűkül a lekérdezés (`WHERE contractor_id IN (...)`). Ha egy lista üres, a `buildWhere()` `[null, []]`-t ad vissza, ami **nulla találatot** jelent (nincs hozzáférés egyetlen dolgozóhoz sem), nem pedig korlátlan hozzáférést.
+
+Ez a scope minden dolgozókra vonatkozó műveletnél érvényesül: listázás (`EmployeeController::index`), létrehozás és szerkesztés validáció (`inScope()` ellenőrzi, hogy a választott contractor/subcontractor engedélyezett-e), valamint a keresési javaslatok (`searchSuggestions`).
+
+## Dolgozó rekord életciklusa
+
+```mermaid
+stateDiagram-v2
+    [*] --> Rögzítve: EmployeeController::store
+    Rögzítve --> Szerkeszthető: imported_at IS NULL
+    Szerkeszthető --> Szerkeszthető: EmployeeController::update
+    Szerkeszthető --> Importálva: POST /api/employees/ack (Employee::markImported)
+    Importálva --> [*]: további szerkesztés blokkolva
+```
+
+Amíg egy dolgozó `imported_at` mezője `NULL`, a webes felületen szerkeszthető, és megjelenik a `GET /api/employees` válaszában. Miután a Gatepass szerver visszaigazolta az importot (`POST /api/employees/ack`), az `imported_at` beállításra kerül, és az `Employee::update()` SQL-je (`WHERE id = :id AND imported_at IS NULL`) csendben nem módosít semmit — a controller réteg (`editBlockReason`) ráadásul explicit `403`-mal is elutasítja a szerkesztési kísérletet.

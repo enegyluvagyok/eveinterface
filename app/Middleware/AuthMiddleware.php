@@ -9,6 +9,10 @@ final class AuthMiddleware
     public function handle(Request $request, callable $next): mixed
     {
         if (!Auth::check()) redirect('/login');
+        if (!Auth::user()) {
+            Auth::logout();
+            redirect('/login');
+        }
         return $next();
     }
 }

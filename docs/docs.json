@@ -1,0 +1,62 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "EVE - Gewiss Gatepass Interface",
+  "description": "Frameworkless PHP 8.2 MVC alkalmazás dokumentációja: alvállalkozói kapcsolattartók és beléptetési adatok kezelése, JWT API a Gewiss Gatepass szerver felé.",
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#2563EB",
+    "light": "#60A5FA",
+    "dark": "#1D4ED8"
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "Bevezetés",
+        "pages": [
+          "index",
+          "quickstart"
+        ]
+      },
+      {
+        "group": "Felhasználói kézikönyv",
+        "pages": [
+          "manual/overview",
+          "manual/bejelentkezes",
+          "manual/dolgozok",
+          "manual/admin",
+          "manual/gyik"
+        ]
+      },
+      {
+        "group": "Architektúra",
+        "pages": [
+          "concepts/architecture",
+          "concepts/routing",
+          "concepts/data-model"
+        ]
+      },
+      {
+        "group": "Funkciók",
+        "pages": [
+          "concepts/auth",
+          "concepts/localization",
+          "guides/mail"
+        ]
+      },
+      {
+        "group": "Gatepass API",
+        "pages": [
+          "guides/api-integration"
+        ]
+      },
+      {
+        "group": "Üzemeltetés",
+        "pages": [
+          "guides/security",
+          "guides/deployment"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+---
+title: "E-mail küldés"
+description: "SMTP konfiguráció és a MailService használata"
+---
+
+Az alkalmazás kimenő e-mailekhez (meghívó, jelszó-visszaállítás) a [PHPMailer](https://github.com/PHPMailer/PHPMailer) csomagot használja SMTP-n keresztül, egy vékony `App\Services\MailService` wrapperbe csomagolva.
+
+## Konfiguráció
+
+```bash title=".env"
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USERNAME=
+SMTP_PASSWORD=
+SMTP_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=no-reply@example.com
+MAIL_FROM_NAME="EVE - Gewiss Gatepass Interface"
+```
+
+Ha `SMTP_USERNAME` üres, a `MailService` `SMTPAuth = false`-t állít be (nyitott/hitelesítés nélküli relay esetére) — éles környezetben szinte mindig hitelesített SMTP-t érdemes használni.
+
+## Használat
+
+```php
+use App\Services\MailService;
+
+(new MailService())->send(
+    'user@example.com',
+    'Teszt levél',
+    '<h1>Sikeres SMTP kapcsolat</h1>'
+);
+```
+
+A `send(string $to, string $subject, string $html, string $text = '')` metódus `$text` kihagyása esetén automatikusan `strip_tags($html)`-ből generál sima szöveges alternatívát.
+
+## Hol hívódik meg éles kódban
+
+| Hívó | Mikor |
+|---|---|
+| `UserController::sendInviteEmail` | Új felhasználó létrehozásakor, jelszóbeállító linkkel |
+| `AuthController::sendResetEmail` | „Elfelejtett jelszó” kérésnél, ha a megadott e-mail létező felhasználóhoz tartozik |
+
+Mindkét hívó **elnyeli a kivételt** (`catch (Throwable $e) { error_log(...); }`), és nem szakítja meg a felhasználói folyamatot SMTP hiba esetén — pl. a felhasználó létrehozása sikeres marad akkor is, ha a meghívó e-mail kiküldése meghiúsul. Ilyenkor a `_invite_link` session kulcsban (`UserController::store`) a nyers meghívó URL is elérhető marad, hogy admin kézzel is átadhassa.
+
+<Warning>
+  SMTP hibák csak a szerver logjában (`error_log`) jelennek meg, felhasználói visszajelzés nélkül. Ha ez éles környezetben problémát okoz (pl. néma kézbesítési hibák), fontold meg egy admin-oldali riasztás bevezetését a `catch` ágban.
+</Warning>

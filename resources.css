@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @source "./app/Views/**/*.php";
+@source "./public/assets/js/**/*.js";
 
 @theme {
   --color-brand-red: #e2231a;

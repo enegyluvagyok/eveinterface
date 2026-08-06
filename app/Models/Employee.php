@@ -3,6 +3,8 @@ namespace App\Models;
 
 final class Employee
 {
+    public const CARD_COLORS = ['red', 'green', 'blue'];
+
     private const LIST_SELECT = <<<SQL
         SELECT e.*, c.name AS contractor_name, s.name AS subcontractor_name, u.name AS created_by_name
         FROM employees e
@@ -13,7 +15,7 @@ final class Employee
 
     /**
      * @param array{date_from?: ?string, date_to?: ?string, contractor_id?: ?int, subcontractor_id?: ?int, q?: ?string,
-     *              allowed_contractor_ids?: int[], allowed_subcontractor_ids?: int[]} $filters
+     *              medical_fitness_status?: ?string, card_color?: ?string, allowed_contractor_ids?: int[], allowed_subcontractor_ids?: int[], created_by?: ?int} $filters
      */
     public static function all(array $filters = [], ?int $limit = null, int $offset = 0): array
     {
@@ -70,8 +72,21 @@ final class Employee
             $params['subcontractor_id'] = (int)$filters['subcontractor_id'];
         }
         if (!empty($filters['q'])) {
-            $where[] = '(e.employee_code LIKE :q OR e.fullname LIKE :q OR e.idcard LIKE :q)';
-            $params['q'] = '%' . str_replace(['%', '_'], ['\%', '\_'], (string)$filters['q']) . '%';
+            $where[] = '(e.fullname LIKE :q_fullname OR e.idcard LIKE :q_idcard)';
+            $like = '%' . str_replace(['%', '_'], ['\%', '\_'], (string)$filters['q']) . '%';
+            $params['q_fullname'] = $like;
+            $params['q_idcard'] = $like;
+        }
+        if (!empty($filters['medical_fitness_status'])) {
+            if ($filters['medical_fitness_status'] === 'valid') {
+                $where[] = 'e.medical_fitness_until >= CURDATE()';
+            } elseif ($filters['medical_fitness_status'] === 'expired') {
+                $where[] = '(e.medical_fitness_until < CURDATE() OR e.medical_fitness_until IS NULL)';
+            }
+        }
+        if (!empty($filters['card_color']) && in_array($filters['card_color'], self::CARD_COLORS, true)) {
+            $where[] = 'e.card_color = :card_color';
+            $params['card_color'] = $filters['card_color'];
         }
 
         if (array_key_exists('allowed_contractor_ids', $filters)) {
@@ -85,6 +100,10 @@ final class Employee
             [$clause, $clauseParams] = self::inClause($filters['allowed_subcontractor_ids'], 'as');
             $where[] = "e.subcontractor_id IN ({$clause})";
             $params += $clauseParams;
+        }
+        if (!empty($filters['created_by'])) {
+            $where[] = 'e.created_by = :created_by';
+            $params['created_by'] = (int)$filters['created_by'];
         }
 
         return [$where, $params];
@@ -103,11 +122,11 @@ final class Employee
         return [implode(',', $placeholders), $params];
     }
 
-    /** Distinct employee_code/fullname/idcard values for the free-text search datalist, scoped like all(). */
+    /** Distinct fullname/idcard values for the free-text search datalist, scoped like all(). */
     public static function searchSuggestions(array $scope, int $limit = 200): array
     {
         $values = [];
-        foreach (['employee_code', 'fullname', 'idcard'] as $column) {
+        foreach (['fullname', 'idcard'] as $column) {
             $values = array_merge($values, self::distinctValues($column, $scope, $limit));
         }
         return array_values(array_unique($values));
@@ -135,15 +154,17 @@ final class Employee
 
     public static function update(int $id, array $data): void
     {
-        $sql = 'UPDATE employees SET employee_code = :employee_code, contractor_id = :contractor_id,
-                subcontractor_id = :subcontractor_id, fullname = :fullname, idcard = :idcard, updated_at = NOW()';
+        $sql = 'UPDATE employees SET contractor_id = :contractor_id,
+                subcontractor_id = :subcontractor_id, fullname = :fullname, idcard = :idcard,
+                medical_fitness_until = :medical_fitness_until, card_color = :card_color, updated_at = NOW()';
         $params = [
             'id' => $id,
-            'employee_code' => $data['employee_code'],
             'contractor_id' => $data['contractor_id'],
             'subcontractor_id' => $data['subcontractor_id'],
             'fullname' => $data['fullname'],
             'idcard' => $data['idcard'],
+            'medical_fitness_until' => $data['medical_fitness_until'],
+            'card_color' => $data['card_color'],
         ];
         if (array_key_exists('photo', $data)) {
             $sql .= ', photo = :photo, avatar = :avatar';
@@ -158,15 +179,16 @@ final class Employee
     public static function create(array $data): int
     {
         $stmt = app('db')->pdo()->prepare(
-            'INSERT INTO employees (employee_code, contractor_id, subcontractor_id, fullname, idcard, photo, avatar, created_by, created_at, updated_at)
-             VALUES (:employee_code, :contractor_id, :subcontractor_id, :fullname, :idcard, :photo, :avatar, :created_by, NOW(), NOW())'
+            'INSERT INTO employees (contractor_id, subcontractor_id, fullname, idcard, medical_fitness_until, card_color, photo, avatar, created_by, created_at, updated_at)
+             VALUES (:contractor_id, :subcontractor_id, :fullname, :idcard, :medical_fitness_until, :card_color, :photo, :avatar, :created_by, NOW(), NOW())'
         );
         $stmt->execute([
-            'employee_code' => $data['employee_code'],
             'contractor_id' => $data['contractor_id'],
             'subcontractor_id' => $data['subcontractor_id'],
             'fullname' => $data['fullname'],
             'idcard' => $data['idcard'],
+            'medical_fitness_until' => $data['medical_fitness_until'],
+            'card_color' => $data['card_color'],
             'photo' => $data['photo'] ?? null,
             'avatar' => $data['avatar'] ?? null,
             'created_by' => $data['created_by'],
@@ -174,18 +196,45 @@ final class Employee
         return (int)app('db')->pdo()->lastInsertId();
     }
 
-    public static function pendingForExport(): array
+    /** @param array $scope same shape as all() — empty = admin, unrestricted */
+    public static function pendingForExport(array $scope = []): array
     {
-        $stmt = app('db')->pdo()->query(self::LIST_SELECT . ' WHERE e.imported_at IS NULL ORDER BY e.created_at');
+        [$where, $params] = self::buildWhere($scope);
+        if ($where === null) return [];
+
+        $where[] = 'e.imported_at IS NULL';
+        $sql = self::LIST_SELECT . ' WHERE ' . implode(' AND ', $where) . ' ORDER BY e.created_at';
+        $stmt = app('db')->pdo()->prepare($sql);
+        $stmt->execute($params);
         return $stmt->fetchAll();
     }
 
-    public static function markImported(array $ids): void
+    /** @param array $scope same shape as all() — empty = admin, unrestricted */
+    public static function markImported(array $ids, array $scope = []): void
     {
         $ids = array_values(array_filter(array_map('intval', $ids)));
         if (!$ids) return;
-        $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $stmt = app('db')->pdo()->prepare("UPDATE employees SET imported_at = NOW() WHERE id IN ({$placeholders})");
-        $stmt->execute($ids);
+
+        $conditions = ['id IN (' . implode(',', array_fill(0, count($ids), '?')) . ')'];
+        $params = $ids;
+
+        if (array_key_exists('allowed_contractor_ids', $scope)) {
+            if (!$scope['allowed_contractor_ids']) return;
+            $conditions[] = 'contractor_id IN (' . implode(',', array_fill(0, count($scope['allowed_contractor_ids']), '?')) . ')';
+            $params = array_merge($params, array_map('intval', $scope['allowed_contractor_ids']));
+        }
+        if (array_key_exists('allowed_subcontractor_ids', $scope)) {
+            if (!$scope['allowed_subcontractor_ids']) return;
+            $conditions[] = 'subcontractor_id IN (' . implode(',', array_fill(0, count($scope['allowed_subcontractor_ids']), '?')) . ')';
+            $params = array_merge($params, array_map('intval', $scope['allowed_subcontractor_ids']));
+        }
+        if (!empty($scope['created_by'])) {
+            $conditions[] = 'created_by = ?';
+            $params[] = (int)$scope['created_by'];
+        }
+
+        $sql = 'UPDATE employees SET imported_at = NOW() WHERE ' . implode(' AND ', $conditions);
+        $stmt = app('db')->pdo()->prepare($sql);
+        $stmt->execute($params);
     }
 }

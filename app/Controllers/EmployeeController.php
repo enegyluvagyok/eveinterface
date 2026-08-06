@@ -26,6 +26,8 @@ final class EmployeeController
             'contractor_id' => (string)$request->input('contractor_id', '') ?: null,
             'subcontractor_id' => (string)$request->input('subcontractor_id', '') ?: null,
             'q' => trim((string)$request->input('q', '')) ?: null,
+            'medical_fitness_status' => (string)$request->input('medical_fitness_status', '') ?: null,
+            'card_color' => (string)$request->input('card_color', '') ?: null,
             ...$scope,
         ];
 
@@ -74,15 +76,15 @@ final class EmployeeController
     public function store(Request $request): never
     {
         $scope = User::accessScope(Auth::user());
-        $employeeCode = trim((string)$request->input('employee_code'));
         $contractorId = (string)$request->input('contractor_id');
         $subcontractorId = (string)$request->input('subcontractor_id');
         $fullname = trim((string)$request->input('fullname'));
         $idcard = trim((string)$request->input('idcard'));
-        $_SESSION['_old'] = compact('employeeCode', 'contractorId', 'subcontractorId', 'fullname', 'idcard');
+        $medicalFitnessUntil = trim((string)$request->input('medical_fitness_until'));
+        $cardColor = trim((string)$request->input('card_color'));
+        $_SESSION['_old'] = compact('contractorId', 'subcontractorId', 'fullname', 'idcard', 'medicalFitnessUntil', 'cardColor');
 
         $errors = [];
-        if ($employeeCode === '') $errors[] = t('validation.card_code_required');
         if (!ctype_digit($contractorId) || !Contractor::find((int)$contractorId) || !$this->inScope((int)$contractorId, $scope['allowed_contractor_ids'] ?? null)) {
             $errors[] = t('validation.contractor_invalid');
         }
@@ -91,6 +93,12 @@ final class EmployeeController
         }
         if (mb_strlen($fullname) < 2) $errors[] = t('validation.fullname_min');
         if ($idcard === '') $errors[] = t('validation.idcard_required');
+        if ($medicalFitnessUntil === '') {
+            $errors[] = t('validation.medical_fitness_required');
+        } elseif (!$this->isValidDate($medicalFitnessUntil)) {
+            $errors[] = t('validation.medical_fitness_invalid');
+        }
+        if (!in_array($cardColor, Employee::CARD_COLORS, true)) $errors[] = t('validation.card_color_required');
 
         $photoPath = null;
         $avatarPath = null;
@@ -105,11 +113,12 @@ final class EmployeeController
         if ($errors) { $_SESSION['_errors'] = $errors; redirect('/employees/create'); }
 
         Employee::create([
-            'employee_code' => $employeeCode,
             'contractor_id' => (int)$contractorId,
             'subcontractor_id' => (int)$subcontractorId,
             'fullname' => $fullname,
             'idcard' => $idcard,
+            'medical_fitness_until' => $medicalFitnessUntil,
+            'card_color' => $cardColor,
             'photo' => $photoPath,
             'avatar' => $avatarPath,
             'created_by' => Auth::id(),
@@ -151,15 +160,15 @@ final class EmployeeController
             exit;
         }
 
-        $employeeCode = trim((string)$request->input('employee_code'));
         $contractorId = (string)$request->input('contractor_id');
         $subcontractorId = (string)$request->input('subcontractor_id');
         $fullname = trim((string)$request->input('fullname'));
         $idcard = trim((string)$request->input('idcard'));
-        $_SESSION['_old'] = compact('employeeCode', 'contractorId', 'subcontractorId', 'fullname', 'idcard');
+        $medicalFitnessUntil = trim((string)$request->input('medical_fitness_until'));
+        $cardColor = trim((string)$request->input('card_color'));
+        $_SESSION['_old'] = compact('contractorId', 'subcontractorId', 'fullname', 'idcard', 'medicalFitnessUntil', 'cardColor');
 
         $errors = [];
-        if ($employeeCode === '') $errors[] = t('validation.card_code_required');
         if (!ctype_digit($contractorId) || !Contractor::find((int)$contractorId) || !$this->inScope((int)$contractorId, $scope['allowed_contractor_ids'] ?? null)) {
             $errors[] = t('validation.contractor_invalid');
         }
@@ -168,6 +177,12 @@ final class EmployeeController
         }
         if (mb_strlen($fullname) < 2) $errors[] = t('validation.fullname_min');
         if ($idcard === '') $errors[] = t('validation.idcard_required');
+        if ($medicalFitnessUntil === '') {
+            $errors[] = t('validation.medical_fitness_required');
+        } elseif (!$this->isValidDate($medicalFitnessUntil)) {
+            $errors[] = t('validation.medical_fitness_invalid');
+        }
+        if (!in_array($cardColor, Employee::CARD_COLORS, true)) $errors[] = t('validation.card_color_required');
 
         $photoData = [];
         if (!$errors) {
@@ -184,11 +199,12 @@ final class EmployeeController
         if ($errors) { $_SESSION['_errors'] = $errors; redirect('/employees/edit?id=' . $id); }
 
         Employee::update($id, [
-            'employee_code' => $employeeCode,
             'contractor_id' => (int)$contractorId,
             'subcontractor_id' => (int)$subcontractorId,
             'fullname' => $fullname,
             'idcard' => $idcard,
+            'medical_fitness_until' => $medicalFitnessUntil,
+            'card_color' => $cardColor,
             ...$photoData,
         ]);
         $_SESSION['_flash'] = t('flash.employee_updated');
@@ -201,6 +217,7 @@ final class EmployeeController
         if ($employee['imported_at'] !== null) return t('employees.already_imported');
         if (!$this->inScope((int)$employee['contractor_id'], $scope['allowed_contractor_ids'] ?? null)) return t('errors.403_desc');
         if (!$this->inScope((int)$employee['subcontractor_id'], $scope['allowed_subcontractor_ids'] ?? null)) return t('errors.403_desc');
+        if (array_key_exists('created_by', $scope) && (int)$employee['created_by'] !== $scope['created_by']) return t('errors.403_desc');
         return null;
     }
 
@@ -222,6 +239,12 @@ final class EmployeeController
     private function inScope(int $id, ?array $allowed): bool
     {
         return $allowed === null || in_array($id, $allowed, true);
+    }
+
+    private function isValidDate(string $value): bool
+    {
+        $date = \DateTime::createFromFormat('Y-m-d', $value);
+        return $date !== false && $date->format('Y-m-d') === $value;
     }
 
     /** @return array{0: ?string, 1: ?string} relative storage paths [photo, avatar] */

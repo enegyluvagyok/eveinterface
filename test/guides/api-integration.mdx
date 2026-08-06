@@ -61,12 +61,11 @@ Az összes **importálásra váró** (`imported_at IS NULL`) dolgozó, létrehoz
   "data": [
     {
       "id": 42,
+      "employee_code": "AB1234",
       "contractor_id": 1,
       "subcontractor_id": 2,
       "fullname": "Kovács János",
       "idcard": "123456AB",
-      "medical_fitness_until": "2027-03-01",
-      "card_color": "green",
       "photo": "http://localhost:8000/api/employees/file?path=6f1a...jpg",
       "avatar": "http://localhost:8000/api/employees/file?path=6f1a..._avatar.jpg",
       "created_by": 1,
@@ -79,7 +78,7 @@ Az összes **importálásra váró** (`imported_at IS NULL`) dolgozó, létrehoz
 ```
 
 <Note>
-  Ez a végpont a hívó felhasználó `accessScope`-jához igazítva működik, ugyanúgy, mint a webes felület (`EmployeeController::index`). **Admin** tokennel minden importálásra váró dolgozó visszajön. **Nem admin** (`user` szerepkörű) tokennel csak a felhasználóhoz rendelt fővállalkozók/alvállalkozók alá tartozó, **és az adott felhasználó által saját maga rögzített** dolgozók jönnek vissza — más felhasználó által ugyanahhoz a vállalkozóhoz felvett dolgozókat a token tulajdonosa nem látja. Ha a Gatepass szerver az összes dolgozót szeretné szinkronizálni felhasználótól függetlenül, admin szerepkörű felhasználóval kell tokent igényelnie.
+  Ez a végpont **nincs** a hívó felhasználó `accessScope`-jához igazítva — minden importálásra váró dolgozót visszaad, függetlenül attól, hogy melyik felhasználó rögzítette. A scope-szűrés csak a webes felületen (`EmployeeController::index`) érvényesül. Ha a Gatepass integrációnak felhasználónkénti szűrésre is szüksége lenne, ezt itt még be kell vezetni.
 </Note>
 
 ### `GET /api/employees/file?path=<fájlnév>`
@@ -102,7 +101,7 @@ curl -X POST http://localhost:8000/api/employees/ack \
 ```
 
 <Info>
-  A visszaadott `updated` szám az elküldött ID-k száma, **nem** a ténylegesen módosított sorok száma — nem létező, már importált, vagy a hívó `accessScope`-ján kívül eső ID-k csendben figyelmen kívül maradnak az `UPDATE ... WHERE id IN (...)` lekérdezésben, de a válasz szám ettől nem csökken. A scope-ellenőrzés ugyanaz, mint a `GET /api/employees`-nél: nem admin token csak a saját maga által rögzített, hozzá rendelt vállalkozós/alvállalkozós dolgozókat tudja importáltra jelölni.
+  A visszaadott `updated` szám az elküldött ID-k száma, **nem** a ténylegesen módosított sorok száma — nem létező vagy már importált ID-k csendben figyelmen kívül maradnak az `UPDATE ... WHERE id IN (...)` lekérdezésben, de a válasz szám ettől nem csökken.
 </Info>
 
 ## Tipikus integrációs folyamat

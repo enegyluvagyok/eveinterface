@@ -1,0 +1,58 @@
+---
+title: "Adminisztráció"
+description: "Felhasználók, vállalkozók és alvállalkozók kezelése (csak admin szerepkörnek)"
+---
+
+Ez a fejezet a menüsávban csak **admin** szerepkörű felhasználóknak megjelenő menüpontokat mutatja be: **Felhasználók**, **Vállalkozók**, **Alvállalkozók**.
+
+## Felhasználók
+
+A **Felhasználók** oldal (`/admin/users`) listázza a rendszer összes felhasználóját: név, e-mail, telefon, szerepkör és regisztráció dátuma szerint, valamint egy **Szerkesztés** linkkel soronként.
+
+### Új felhasználó felvétele
+
+Az **Új felhasználó** gombra kattintva az alábbi mezőket kell kitölteni:
+
+| Mező | Megjegyzés |
+|---|---|
+| Név | Kötelező, legalább 2 karakter |
+| E-mail | Kötelező, egyedinek kell lennie |
+| Telefon | Opcionális |
+| Szerepkör | `Felhasználó` vagy `Adminisztrátor` |
+| Vállalkozók | Jelölőnégyzetes lista — melyik vállalkozók dolgozóit láthatja/szerkesztheti |
+| Alvállalkozók | Jelölőnégyzetes lista — melyik alvállalkozók dolgozóit láthatja/szerkesztheti |
+
+<Note>
+  Az itt beállított vállalkozó/alvállalkozó lista csak **`Felhasználó`** szerepkörnél számít — egy `Adminisztrátor` mindig minden dolgozóhoz hozzáfér, függetlenül attól, mi van itt bejelölve.
+</Note>
+
+Az űrlap elküldése után a rendszer **nem kér be jelszót** — automatikusan generál egy ideiglenes, senki által nem ismert jelszót, majd meghívó e-mailt küld az új felhasználónak egy jelszóbeállító linkkel.
+
+<Warning>
+  Ha az e-mail küldése bármilyen okból (pl. hibás SMTP beállítás) meghiúsul, a felhasználó létrehozása **akkor is sikeres marad**. Ilyenkor a lista tetején egy egyszeri figyelmeztető sáv jelenik meg a nyers meghívó linkkel — ezt másold ki, és oszd meg valamilyen más csatornán (pl. belső chat) az új felhasználóval, mert ez a link csak egyszer, ezen az oldalon jelenik meg újra.
+</Warning>
+
+### Felhasználó szerkesztése
+
+A **Szerkesztés** linkre kattintva módosítható:
+
+- **Telefon**
+- **Szerepkör** (`Felhasználó` ⇄ `Adminisztrátor`)
+- **Hozzárendelt vállalkozók/alvállalkozók**
+
+A **név** és **e-mail cím** ezen a felületen nem módosítható. Jelszót sem lehet itt beállítani a felhasználó helyett — ha valaki elfelejtette a jelszavát, irányítsd a [Bejelentkezés](/manual/bejelentkezes) oldal „Elfelejtett jelszó” linkjéhez.
+
+## Vállalkozók és alvállalkozók
+
+A **Vállalkozók** (`/admin/contractors`) és **Alvállalkozók** (`/admin/subcontractors`) oldalak felépítése azonos: bal oldalt a meglévő bejegyzések táblázata (azonosító + név), jobb oldalt egy egyszerű felviteli form.
+
+| Mező | Megjegyzés |
+|---|---|
+| Azonosító | Egész szám, **kézzel megadva** |
+| Név | Kötelező, egyedinek kell lennie |
+
+<Warning>
+  Az azonosítónak **pontosan meg kell egyeznie** a Gewiss Gatepass rendszerben már létező vállalkozó/alvállalkozó azonosítójával. Ha eltérő (akár csak közel álló) azonosítót adsz meg, az ehhez a vállalkozóhoz felvett dolgozók importáláskor **nem fognak a megfelelő céghez kapcsolódni** a Gatepass oldalon. Egyeztess a Gatepass rendszer üzemeltetőjével a helyes azonosítóról, mielőtt új vállalkozót/alvállalkozót veszel fel.
+</Warning>
+
+Már meglévő azonosító vagy név megadása esetén a rendszer hibaüzenetet ad, és nem hoz létre duplikátumot.

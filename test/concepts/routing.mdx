@@ -1,0 +1,59 @@
+---
+title: "Routing és middleware"
+description: "Web és API végpontok, hozzá rendelt middleware-ekkel"
+---
+
+A route-okat két fájl regisztrálja egy közös `Router` példányon: `routes/web.php` (session alapú felület) és `routes/api.php` (JWT alapú API). A router csak pontos, statikus útvonalakat ismer (nincs paraméteres `/{id}` szegmens) — az azonosítókat query stringben adják át (pl. `/employees/edit?id=5`).
+
+```php
+$router->get(string $path, array|Closure $handler, array $middleware = []): void
+$router->post(string $path, array|Closure $handler, array $middleware = []): void
+```
+
+## Webes route-ok (`routes/web.php`)
+
+| Metódus | Útvonal | Kezelő | Middleware |
+|---|---|---|---|
+| GET | `/` | `HomeController::index` | — |
+| GET | `/lang` | `LocaleController::set` | — |
+| GET | `/dashboard` | `HomeController::dashboard` | Auth |
+| GET | `/login` | `AuthController::showLogin` | Guest |
+| POST | `/login` | `AuthController::login` | Guest, Csrf |
+| POST | `/logout` | `AuthController::logout` | Auth, Csrf |
+| GET | `/forgot-password` | `AuthController::showForgotPassword` | Guest |
+| POST | `/forgot-password` | `AuthController::forgotPassword` | Guest, Csrf |
+| GET | `/reset-password` | `AuthController::showResetPassword` | Guest |
+| POST | `/reset-password` | `AuthController::resetPassword` | Guest, Csrf |
+| GET | `/admin/users` | `UserController::index` | Auth, Admin |
+| GET | `/admin/users/create` | `UserController::create` | Auth, Admin |
+| POST | `/admin/users` | `UserController::store` | Auth, Admin, Csrf |
+| GET | `/admin/users/edit` | `UserController::edit` | Auth, Admin |
+| POST | `/admin/users/edit` | `UserController::update` | Auth, Admin, Csrf |
+| GET | `/admin/contractors` | `ContractorController::index` | Auth, Admin |
+| POST | `/admin/contractors` | `ContractorController::store` | Auth, Admin, Csrf |
+| GET | `/admin/subcontractors` | `SubcontractorController::index` | Auth, Admin |
+| POST | `/admin/subcontractors` | `SubcontractorController::store` | Auth, Admin, Csrf |
+| GET | `/employees` | `EmployeeController::index` | Auth |
+| GET | `/employees/create` | `EmployeeController::create` | Auth |
+| POST | `/employees` | `EmployeeController::store` | Auth, Csrf |
+| GET | `/employees/edit` | `EmployeeController::edit` | Auth |
+| POST | `/employees/edit` | `EmployeeController::update` | Auth, Csrf |
+| GET | `/employees/photo` | `EmployeeController::photo` | Auth |
+
+## API route-ok (`routes/api.php`)
+
+Minden API végpont közös alap middleware-e: `CorsMiddleware`, `RateLimitMiddleware`. A védett végpontok ezután `ApiAuthMiddleware`-t is kapnak.
+
+| Metódus | Útvonal | Kezelő | Middleware |
+|---|---|---|---|
+| POST | `/api/token` | `ApiController::token` | Cors, RateLimit |
+| GET | `/api/me` | `ApiController::me` | Cors, RateLimit, ApiAuth |
+| GET | `/api/employees` | `ApiController::employees` | Cors, RateLimit, ApiAuth |
+| GET | `/api/employees/file` | `ApiController::employeeFile` | Cors, RateLimit, ApiAuth |
+| POST | `/api/employees/ack` | `ApiController::employeesAck` | Cors, RateLimit, ApiAuth |
+
+Bővebben az API viselkedéséről: [Gatepass API integráció](/guides/api-integration).
+
+## Miért nincs útvonal-paraméterezés?
+
+A `Router::add()` a metódus + a levágott perjelekkel normalizált path alapján egy asszociatív tömbben tárolja a route-okat (`$this->routes[$method]['/' . trim($path, '/')]`), ami O(1) illesztést tesz lehetővé, de kizárja a dinamikus szegmenseket. Új entitástípus route-jainak felvételekor kövesd a meglévő mintát: `index` (lista), `create` (form), `store` (POST), `edit` (form + `?id=`), `update` (POST + `?id=`).

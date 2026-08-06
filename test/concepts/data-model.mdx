@@ -18,7 +18,7 @@ A séma a `database/migrations/*.sql` fájlokból épül fel sorrendben (`compos
     Azonos szerkezet, mint a `contractors` — az `id` itt is a Gatepass rendszer kulcsával egyezik meg
   </Card>
   <Card title="employees" icon="id-card">
-    `contractor_id` (FK), `subcontractor_id` (FK), `fullname`, `idcard`, `medical_fitness_until` (orvosi alkalmassági érvényesség), `card_color` (`red`/`green`/`blue`), `photo`, `avatar`, `created_by` (FK → `users`), `imported_at` (NULL = importálásra vár)
+    `employee_code`, `contractor_id` (FK), `subcontractor_id` (FK), `fullname`, `idcard`, `photo`, `avatar`, `created_by` (FK → `users`), `imported_at` (NULL = importálásra vár)
   </Card>
 </Columns>
 
@@ -31,14 +31,14 @@ A séma a `database/migrations/*.sql` fájlokból épül fel sorrendben (`compos
 ## Hozzáférési hatókör (`User::accessScope`)
 
 ```php
-/** @return array{} | array{allowed_contractor_ids: int[], allowed_subcontractor_ids: int[], created_by: int} üres = admin, korlátlan */
+/** @return array{} | array{allowed_contractor_ids: int[], allowed_subcontractor_ids: int[]} üres = admin, korlátlan */
 public static function accessScope(array $user): array
 ```
 
 - **Admin**: üres tömböt kap vissza → a `EmployeeModel::buildWhere()` nem alkalmaz szűrést, minden dolgozó látható.
-- **Nem admin**: a `user_contractors`/`user_subcontractors` tábla alapján kapott ID-listákkal szűkül a lekérdezés (`WHERE contractor_id IN (...)`), **és** a `created_by` mezőn keresztül kizárólag a saját maga által rögzített dolgozókra (`WHERE created_by = :created_by`) — más felhasználó által ugyanahhoz a vállalkozóhoz/alvállalkozóhoz felvett dolgozókat nem látja. Ha egy contractor/subcontractor lista üres, a `buildWhere()` `[null, []]`-t ad vissza, ami **nulla találatot** jelent (nincs hozzáférés egyetlen dolgozóhoz sem), nem pedig korlátlan hozzáférést.
+- **Nem admin**: a `user_contractors`/`user_subcontractors` tábla alapján kapott ID-listákkal szűkül a lekérdezés (`WHERE contractor_id IN (...)`). Ha egy lista üres, a `buildWhere()` `[null, []]`-t ad vissza, ami **nulla találatot** jelent (nincs hozzáférés egyetlen dolgozóhoz sem), nem pedig korlátlan hozzáférést.
 
-Ez a scope minden dolgozókra vonatkozó műveletnél érvényesül: listázás (`EmployeeController::index`), létrehozás és szerkesztés validáció (`inScope()` ellenőrzi, hogy a választott contractor/subcontractor engedélyezett-e), a keresési javaslatok (`searchSuggestions`), valamint a REST API (`GET /api/employees` a `pendingForExport()`-on, `POST /api/employees/ack` a `markImported()`-on keresztül — ld. [API integráció](/guides/api-integration)).
+Ez a scope minden dolgozókra vonatkozó műveletnél érvényesül: listázás (`EmployeeController::index`), létrehozás és szerkesztés validáció (`inScope()` ellenőrzi, hogy a választott contractor/subcontractor engedélyezett-e), valamint a keresési javaslatok (`searchSuggestions`).
 
 ## Dolgozó rekord életciklusa
 

@@ -119,13 +119,14 @@ final class User
         }
     }
 
-    /** @return array{} | array{allowed_contractor_ids: int[], allowed_subcontractor_ids: int[]} empty = admin, unrestricted */
+    /** @return array{} | array{allowed_contractor_ids: int[], allowed_subcontractor_ids: int[], created_by: int} empty = admin, unrestricted */
     public static function accessScope(array $user): array
     {
         if (($user['role'] ?? null) === 'admin') return [];
         return [
             'allowed_contractor_ids' => self::contractorIds((int)$user['id']),
             'allowed_subcontractor_ids' => self::subcontractorIds((int)$user['id']),
+            'created_by' => (int)$user['id'],
         ];
     }
 }

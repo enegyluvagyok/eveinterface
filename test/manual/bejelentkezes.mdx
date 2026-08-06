@@ -1,0 +1,42 @@
+---
+title: "Bejelentkezés és jelszókezelés"
+description: "Bejelentkezés, elfelejtett jelszó, jelszó-visszaállítás és nyelvváltás"
+---
+
+## Bejelentkezés
+
+A kezdőoldalon (`/`) a **Bejelentkezés** gombra kattintva jutsz a login formhoz, ahol az e-mail címedet és jelszavadat kell megadnod.
+
+Sikertelen próbálkozásnál a form tetején piros hibaüzenet jelenik meg (*„Hibás e-mail cím vagy jelszó”*), és a megadott e-mail cím megmarad a mezőben. Sikeres bejelentkezés után a rendszer az **Irányítópultra** irányít.
+
+<Note>
+  Ha már be vagy jelentkezve, a `/login` oldal automatikusan az Irányítópultra irányít — nem szükséges kétszer bejelentkezni.
+</Note>
+
+## Elfelejtett jelszó
+
+1. A bejelentkező oldalon kattints az **„Elfelejtettem a jelszavam”** linkre.
+2. Add meg az e-mail címedet, majd küldd el a formot.
+3. A rendszer **mindig** ugyanazt a visszaigazolást mutatja („ha az e-mail cím szerepel a rendszerben, elküldtük a visszaállító linket”) — függetlenül attól, hogy létezik-e ilyen fiók. Ez szándékos: így egy támadó nem tudja kitalálni, mely e-mail címek regisztráltak.
+4. Ha a fiók létezik, egy e-mailt kapsz egy egyedi visszaállító linkkel.
+
+### Új jelszó beállítása
+
+A kapott linkre kattintva egy formot látsz, ahol az új jelszót és annak megerősítését kell megadnod.
+
+- A jelszónak **legalább 12 karakter** hosszúnak kell lennie.
+- A két mezőnek pontosan egyeznie kell.
+
+Sikeres beállítás után a rendszer automatikusan bejelentkeztet, és az Irányítópultra irányít.
+
+<Warning>
+  A visszaállító link csak korlátozott ideig érvényes (alapértelmezetten 24 óráig), és **egyszer használható fel**. Ha lejárt vagy már felhasznált linkre kattintasz, a rendszer visszairányít az „Elfelejtett jelszó” oldalra egy hibaüzenettel — ilyenkor egyszerűen kérj egy új linket.
+</Warning>
+
+## Meghívás (új felhasználók esetén)
+
+Ha egy admin most vett fel új felhasználóként a rendszerbe, **nem kapsz automatikusan jelszót** — egy meghívó e-mailt kapsz egy jelszóbeállító linkkel, ami ugyanúgy működik, mint a fenti „Új jelszó beállítása” folyamat. Ha nem érkezik meg a meghívó e-mail, kérd meg az adminisztrátort, hogy ossza meg veled közvetlenül a beállító linket (ő látja azt a felhasználók listája fölött, ha az e-mail küldése nem sikerült).
+
+## Nyelv váltása
+
+A jobb felső sarokban lévő **HU / EN / 中文** linkek bármelyikére kattintva azonnal vált a felület nyelve, és az aktuális oldalon maradsz. A választás egy sütiben tárolódik, ezért legközelebbi látogatáskor is megmarad — böngészőnként/eszközönként külön.

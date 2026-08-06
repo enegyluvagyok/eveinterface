@@ -4,6 +4,7 @@ declare(strict_types=1);
 use App\Core\App;
 use App\Core\Database;
 use App\Models\Contractor;
+use App\Models\Employee;
 use App\Models\Subcontractor;
 use App\Models\User;
 use Dotenv\Dotenv;
@@ -122,9 +123,10 @@ for ($i = 1; $i <= $remainingUsers; $i++) {
 echo 'Alkalmazottak létrehozása…' . PHP_EOL;
 $creatorIds = array_keys($creatorScopes);
 $insert = $pdo->prepare(
-    'INSERT INTO employees (employee_code, contractor_id, subcontractor_id, fullname, idcard, photo, avatar, created_by, imported_at, created_at, updated_at)
-     VALUES (:employee_code, :contractor_id, :subcontractor_id, :fullname, :idcard, NULL, NULL, :created_by, :imported_at, :created_at, :updated_at)'
+    'INSERT INTO employees (contractor_id, subcontractor_id, fullname, idcard, medical_fitness_until, card_color, photo, avatar, created_by, imported_at, created_at, updated_at)
+     VALUES (:contractor_id, :subcontractor_id, :fullname, :idcard, :medical_fitness_until, :card_color, NULL, NULL, :created_by, :imported_at, :created_at, :updated_at)'
 );
+$cardColors = Employee::CARD_COLORS;
 for ($i = 1; $i <= EMPLOYEE_COUNT; $i++) {
     $creatorId = $creatorIds[array_rand($creatorIds)];
     $scope = $creatorScopes[$creatorId];
@@ -136,11 +138,12 @@ for ($i = 1; $i <= EMPLOYEE_COUNT; $i++) {
     $importedAt = $imported ? date('Y-m-d H:i:s', strtotime($createdAt) + random_int(3600, 5 * 86400)) : null;
 
     $insert->execute([
-        'employee_code' => 'CARD-' . str_pad((string)$i, 4, '0', STR_PAD_LEFT),
         'contractor_id' => $contractorId,
         'subcontractor_id' => $subcontractorId,
         'fullname' => randomPersonName($firstNames, $lastNames),
         'idcard' => chr(random_int(65, 90)) . chr(random_int(65, 90)) . random_int(100000, 999999),
+        'medical_fitness_until' => date('Y-m-d', time() + random_int(-180, 365) * 86400),
+        'card_color' => $cardColors[array_rand($cardColors)],
         'created_by' => $creatorId,
         'imported_at' => $importedAt,
         'created_at' => $createdAt,

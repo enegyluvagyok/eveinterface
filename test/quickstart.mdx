@@ -1,0 +1,81 @@
+---
+title: "Gyors indulás"
+description: "Telepítés, konfiguráció, migrációk és a fejlesztői szerver indítása"
+---
+
+## Követelmények
+
+- PHP 8.2+ a `pdo_mysql`, `mbstring` és `gd` kiterjesztésekkel
+- Composer
+- Node.js 20+ / npm (Tailwind CSS build-hez)
+- MySQL 8+ vagy MariaDB
+- Apache `mod_rewrite`, Nginx, vagy a PHP beépített szervere
+
+## Telepítés
+
+<Steps>
+  <Step title="Környezeti fájl és függőségek">
+    ```bash
+    cp .env.example .env
+    composer install
+    npm install
+    npm run build
+    ```
+  </Step>
+  <Step title=".env kitöltése">
+    Töltsd ki legalább az adatbázis (`DB_*`), az `APP_KEY` és a `JWT_SECRET` mezőket. Lásd a lenti Konfigurációs kulcsok táblázatot.
+  </Step>
+  <Step title="Adatbázis migráció">
+    Hozd létre a `.env`-ben megadott nevű adatbázist, majd futtasd:
+    ```bash
+    composer migrate
+    ```
+    Ez sorban lefuttatja a `database/migrations/*.sql` fájlokat.
+  </Step>
+  <Step title="Kezdeti adatok (opcionális)">
+    ```bash
+    composer seed:admin
+    composer seed:demo
+    ```
+    Az első parancs egy admin felhasználót hoz létre, a második demó vállalkozói/alvállalkozói adatokat tölt be.
+  </Step>
+  <Step title="Fejlesztői szerver indítása">
+    ```bash
+    composer serve
+    ```
+    Nyisd meg: [http://localhost:8000](http://localhost:8000)
+  </Step>
+</Steps>
+
+<Note>
+  A webszerver **document root**-ja mindig a `public/` könyvtár legyen — az alkalmazás gyökere (`app/`, `config/`, `database/`, `storage/`) nem lehet publikusan elérhető.
+</Note>
+
+## Konfigurációs kulcsok
+
+A `config/*.php` fájlok az azonos nevű `.env` változókból épülnek fel, és a `config('fájl.kulcs')` helperrel érhetők el (lásd [Architektúra](/concepts/architecture)).
+
+| .env kulcs | Config kulcs | Leírás |
+|---|---|---|
+| `APP_KEY` | `app.key` | Alkalmazás titkos kulcsa — legalább 32 bájt, véletlenszerű |
+| `APP_DEBUG` | `app.debug` | `true` esetén a kivételek visszadobódnak (nem 500-as hibaoldal) |
+| `APP_TIMEZONE` | `app.timezone` | PHP alapértelmezett időzóna |
+| `DB_HOST` / `DB_PORT` / `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD` | `database.*` | MySQL/MariaDB kapcsolat |
+| `SESSION_SECURE` | — | `true` esetén a session cookie csak HTTPS-en küldődik |
+| `JWT_SECRET` / `JWT_ISSUER` / `JWT_AUDIENCE` / `JWT_TTL` | `security.jwt_*` | API JWT kibocsátás/ellenőrzés paraméterei |
+| `CORS_ALLOWED_ORIGINS` | `security.cors_allowed_origins` | Vesszővel elválasztott engedélyezett origin-ek |
+| `RATE_LIMIT_MAX` / `RATE_LIMIT_WINDOW` | `security.rate_limit_*` | API rate limit (kérés/időablak mp-ben) |
+| `PASSWORD_RESET_TTL` | `security.password_reset_ttl` | Jelszó-visszaállító token élettartama (mp) |
+| `SMTP_*`, `MAIL_FROM_*` | `mail.*` | Kimenő SMTP e-mail beállítások |
+
+`JWT_SECRET` és `APP_KEY` **különálló**, egyenként legalább 32 bájtos véletlen titok legyen — soha ne ugyanaz az érték.
+
+## Első API hívás kipróbálása
+
+```bash
+curl -X POST http://localhost:8000/api/token \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"admin@example.com","password":"very-secure-password"}'
+```
+
+A válaszban kapott `access_token`-nel a védett végpontok hívhatók — részletek a [Gatepass API](/guides/api-integration) fejezetben.

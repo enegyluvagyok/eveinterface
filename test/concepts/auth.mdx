@@ -1,0 +1,54 @@
+---
+title: "Autentikáció és jogosultságok"
+description: "Session bejelentkezés, szerepkörök és jelszó-visszaállítás"
+---
+
+## Session bejelentkezés
+
+Az `App\Core\Auth` osztály kezeli a webes bejelentkezést session alapon:
+
+```php
+Auth::attempt($email, $password): bool   // ellenőriz, bejelentkeztet, szükség esetén rehash-eli a jelszót
+Auth::loginAs($userId): void             // session_regenerate_id(true) + $_SESSION['user_id']
+Auth::check(): bool
+Auth::id(): ?int
+Auth::user(): ?array                     // friss adatbázis lekérdezés, nem session-cache
+Auth::logout(): void                     // session ürítés + cookie törlés + session_destroy()
+```
+
+`Auth::user()` minden hívásnál újra lekérdezi a felhasználót az adatbázisból `User::find()`-dal — így ha egy admin időközben törli a felhasználót vagy megváltoztatja a szerepkörét, az azonnal érvényesül a következő kérésnél, nem csak a session frissítésekor.
+
+<Warning>
+  Ha a session `user_id`-jához tartozó felhasználó már nem létezik az adatbázisban (törölve lett), az `AuthMiddleware` automatikusan kilépteti (`Auth::logout()`) és `/login`-ra irányítja — ez a védelem szándékos, ne távolítsd el a `if (!Auth::user())` ágat az `AuthMiddleware`-ből.
+</Warning>
+
+## Szerepkörök
+
+Két szerepkör létezik: `admin` és `user` (`users.role` ENUM). Az `AdminMiddleware` `403`-at ad, ha a bejelentkezett felhasználó szerepköre nem `admin`. Admin jogosultsághoz kötött funkciók:
+
+- Felhasználók kezelése (`/admin/users*`)
+- Vállalkozók/alvállalkozók felvétele (`/admin/contractors`, `/admin/subcontractors`)
+- Korlátlan hozzáférés minden dolgozóhoz (lásd [Adatmodell → Hozzáférési hatókör](/concepts/data-model))
+
+Új `user` szerepkörű felhasználó csak azokhoz a vállalkozókhoz/alvállalkozókhoz fér hozzá, amiket az admin a létrehozáskor vagy szerkesztéskor hozzárendel (`User::syncContractors` / `syncSubcontractors`).
+
+## Jelszó-visszaállítás és meghívás
+
+Új felhasználó létrehozásakor (`UserController::store`) **nem admin által megadott jelszó** kerül mentésre, hanem egy véletlen, eldobható jelszó (`bin2hex(random_bytes(32))`), majd egy `PasswordReset` tokent generál a rendszer, és meghívó e-mailt küld a beállító linkkel:
+
+```php
+$throwawayPassword = bin2hex(random_bytes(32));
+$userId = User::create($name, $email, $throwawayPassword, $role, $phone);
+$token = PasswordReset::issue($userId);
+$inviteUrl = PasswordReset::url($token);
+```
+
+A `PasswordReset` a tokent **SHA-256 hash-elve** tárolja (`users.password_reset_token_hash`), lejárati idővel (`security.password_reset_ttl`, alapértelmezetten 24 óra). A `resetPassword` folyamat legalább 12 karakteres jelszót követel meg, majd `PasswordReset::consume()` törli a tokent — így az egyszer használható.
+
+## CSRF védelem
+
+Minden állapotváltoztató (`POST`) webes route `CsrfMiddleware`-t kap, ami a `_token` mezőt hasonlítja a session-ben tárolt tokenhez (`hash_equals`, időzítéstámadás ellen védett). A form nézetekben a `csrf_field()` helper szúrja be a rejtett mezőt. Eltérés esetén a válasz `419 CSRF token mismatch.` — ez **nem** a szokásos hibaoldalakon (403/404/500) keresztül fut, hanem közvetlen `exit()`-tel zár.
+
+<Info>
+  Az API-nak (`routes/api.php`) nincs CSRF védelme, mert stateless JWT autentikációt használ, nem session cookie-t — ezért nincs kitéve CSRF támadásnak. Lásd [Gatepass API](/guides/api-integration).
+</Info>

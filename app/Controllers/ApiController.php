@@ -31,11 +31,15 @@ final class ApiController
 
     public function employees(Request $request): never
     {
+        $user = User::find((int)($_SERVER['API_USER_ID'] ?? 0));
+        if (!$user) Response::json(['error' => 'User not found'], 404);
+        $scope = User::accessScope($user);
+
         $rows = array_map(function (array $row): array {
             $row['photo'] = $row['photo'] ? $this->fileUrl($row['photo']) : null;
             $row['avatar'] = $row['avatar'] ? $this->fileUrl($row['avatar']) : null;
             return $row;
-        }, Employee::pendingForExport());
+        }, Employee::pendingForExport($scope));
 
         Response::json(['data' => $rows]);
     }
@@ -59,7 +63,11 @@ final class ApiController
     {
         $ids = $request->input('ids', []);
         if (!is_array($ids)) Response::json(['error' => 'ids must be an array'], 422);
-        Employee::markImported($ids);
+
+        $user = User::find((int)($_SERVER['API_USER_ID'] ?? 0));
+        if (!$user) Response::json(['error' => 'User not found'], 404);
+
+        Employee::markImported($ids, User::accessScope($user));
         Response::json(['updated' => count($ids)]);
     }
 

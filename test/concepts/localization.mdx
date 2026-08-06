@@ -1,0 +1,41 @@
+---
+title: "Lokalizáció"
+description: "Nyelvváltás és fordítási kulcsok kezelése"
+---
+
+## Támogatott nyelvek
+
+```php title="config/locale.php"
+return [
+    'supported' => ['hu', 'en', 'zh'],
+    'default' => 'hu',
+];
+```
+
+A nyelv feloldása (`App\Core\Locale::resolve()`) egy `locale` nevű, 1 évig érvényes, `httponly` sütiből történik. Érvénytelen vagy hiányzó süti esetén a `config('locale.default')` (`hu`) az alapértelmezett. A nyelv váltása a `GET /lang` route-on keresztül történik (`LocaleController::set`), ami a `Locale::set()`-et hívja meg és visszairányít.
+
+## Fordítási kulcsok használata
+
+A globális `t(string $key): string` helper (`app/Core/helpers.php`) tölti be és cache-eli (statikus tömbben, kérésenként) az aktuális nyelv fordítási fájlját:
+
+```php
+function t(string $key): string
+{
+    static $cache = [];
+    $locale = app('locale');
+    $cache[$locale] ??= require dirname(__DIR__, 2) . "/resources/lang/{$locale}.php";
+    return $cache[$locale][$key] ?? $key;
+}
+```
+
+A fordítási fájlok a `resources/lang/{locale}.php` alatt lapos kulcs → szöveg tömböket adnak vissza (pl. `validation.email_invalid`, `flash.employee_saved`). Ha egy kulcs hiányzik az aktuív nyelvi fájlból, a `t()` **magát a kulcsot** adja vissza fallback gyanánt — ez fejlesztéskor azonnal láthatóvá teszi a hiányzó fordítást, de éles környezetben felhasználó által látott hibaüzenetet eredményezhet, ha egy kulcs kimarad.
+
+<Tip>
+  Új nyelv hozzáadásához: vedd fel a nyelvkódot a `config/locale.php` `supported` listájába, és hozz létre egy `resources/lang/{kód}.php` fájlt, ami **ugyanazokat a kulcsokat** tartalmazza, mint a `hu.php` — a `t()` nem esik vissza másik nyelvre hiányzó kulcs esetén, csak a nyers kulcsra.
+</Tip>
+
+## Új kulcs felvétele
+
+1. Add hozzá a kulcsot **mindegyik** `resources/lang/{hu,en,zh}.php` fájlhoz.
+2. Hivatkozz rá nézetben vagy controllerben: `t('flash.valami_uzenet')`.
+3. Kerüld a dinamikusan összefűzött kulcsokat (`t('prefix.' . $suffix)`) — nehezen kereshetők és könnyen elgépelhetők; helyette explicit `match`/`if` ággal válaszd ki a teljes kulcsot.

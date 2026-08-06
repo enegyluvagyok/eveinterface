@@ -4,9 +4,17 @@
 <?php require dirname(__DIR__) . '/partials/flash.php'; ?>
 <form class="mt-6 space-y-5" method="post" action="/employees/edit" enctype="multipart/form-data"><?= csrf_field() ?>
 <input type="hidden" name="id" value="<?= e($employee['id']) ?>">
-<label class="block"><span class="text-sm"><?= t('employees.col_code') ?></span><input class="mt-2 w-full rounded border border-brand-ink-light bg-brand-panel-strong px-4 py-3" name="employee_code" value="<?= old('employeeCode', $employee['employee_code']) ?>" required></label>
 <label class="block"><span class="text-sm"><?= t('employees_create.fullname') ?></span><input class="mt-2 w-full rounded border border-brand-ink-light bg-brand-panel-strong px-4 py-3" name="fullname" value="<?= old('fullname', $employee['fullname']) ?>" required></label>
 <label class="block"><span class="text-sm"><?= t('employees_create.idcard') ?></span><input class="mt-2 w-full rounded border border-brand-ink-light bg-brand-panel-strong px-4 py-3" name="idcard" value="<?= old('idcard', $employee['idcard']) ?>" required></label>
+<label class="block"><span class="text-sm"><?= t('employees_create.medical_fitness_until') ?></span><input class="mt-2 w-full rounded border border-brand-ink-light bg-brand-panel-strong px-4 py-3" type="date" name="medical_fitness_until" value="<?= old('medicalFitnessUntil', $employee['medical_fitness_until']) ?>" required></label>
+<label class="block"><span class="text-sm"><?= t('employees_create.card_color') ?></span>
+  <select class="mt-2 w-full rounded border border-brand-ink-light bg-brand-panel-strong px-4 py-3" name="card_color" required>
+    <option value=""><?= t('employees_create.select_placeholder') ?></option>
+    <?php foreach (\App\Models\Employee::CARD_COLORS as $color): ?>
+      <option value="<?= e($color) ?>" <?= old('cardColor', (string)$employee['card_color']) === $color ? 'selected' : '' ?>><?= t('employees.card_color_' . $color) ?></option>
+    <?php endforeach; ?>
+  </select>
+</label>
 <label class="block"><span class="text-sm"><?= t('employees.contractor_label') ?></span>
   <select class="mt-2 w-full rounded border border-brand-ink-light bg-brand-panel-strong px-4 py-3" name="contractor_id" required>
     <option value=""><?= t('employees_create.select_placeholder') ?></option>

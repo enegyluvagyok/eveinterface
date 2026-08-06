@@ -27,7 +27,7 @@ Az alkalmazás egy saját, keretrendszer nélküli **PHP 8.2+ MVC alap** (`start
 ## Fő funkciók
 
 - **Session autentikáció** a webes felülethez (`AuthMiddleware`, `GuestMiddleware`, `AdminMiddleware`), szerepkör alapú admin/user hozzáféréssel.
-- **Kapcsolattartói hatókör (scope)**: nem admin felhasználók csak a hozzájuk rendelt vállalkozókhoz/alvállalkozókhoz tartozó, **saját maguk által rögzített** dolgozókat láthatják és szerkeszthetik (`User::accessScope`).
+- **Kapcsolattartói hatókör (scope)**: nem admin felhasználók csak a hozzájuk rendelt vállalkozókhoz/alvállalkozókhoz tartozó dolgozókat láthatják és szerkeszthetik (`User::accessScope`).
 - **Dolgozó nyilvántartás**: fénykép feltöltéssel és automatikus avatar generálással (GD), szűréssel, lapozással és szabadszavas kereséssel.
 - **JWT API** a Gatepass szerver felé: token kérés, importálásra váró dolgozók lekérdezése, fénykép letöltés, importálás visszaigazolása.
 - **Jelszó-visszaállítás** és meghívó e-mail SMTP-n (PHPMailer) keresztül.

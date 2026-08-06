@@ -1,0 +1,76 @@
+---
+title: "Architektúra"
+description: "A core réteg felépítése: bootstrap, DI konténer, router, middleware pipeline"
+---
+
+## Kérés életciklusa
+
+Minden kérés a `public/index.php`-n megy keresztül (a `public/.htaccess` minden nem létező fájlt/könyvtárat ide irányít):
+
+<Steps>
+  <Step title="Bootstrap">
+    Betöltődik a Composer autoloader, a `.env` (`vlucas/phpdotenv`), majd a `config/*.php` fájlok egy tömbbe gyűlnek össze és bekerülnek a DI konténerbe (`App::instance()->set('config', ...)`).
+  </Step>
+  <Step title="Session indítás">
+    A session neve, mentési útvonala (`storage/sessions`) és cookie paraméterei (`secure`, `httponly`, `samesite`, `strict_mode`) a `.env`-ből állnak be, mielőtt `session_start()` lefut.
+  </Step>
+  <Step title="Szolgáltatások regisztrálása">
+    `db` (a `Database` PDO wrapper), `view` (a `View` renderer) és `locale` (a `Locale::resolve()` eredménye) bekerül a konténerbe.
+  </Step>
+  <Step title="Routing">
+    Egy üres `Router` példányba betöltődik a `routes/web.php` és `routes/api.php`, majd `$router->dispatch(new Request())` lefuttatja az illeszkedő route-ot.
+  </Step>
+  <Step title="Hibakezelés">
+    A `dispatch()`-ból feldobott kivételeket az `index.php` fogja el: naplózza (`error_log`), és — ha `APP_DEBUG=false` — 500-as hibaoldalt renderel ahelyett, hogy a stack trace kiszivárogna.
+  </Step>
+</Steps>
+
+## `App\Core` osztályok
+
+| Osztály | Felelősség |
+|---|---|
+| `App` | Egyszerű singleton DI konténer (`set`/`get`), kulcs hiányában `RuntimeException`-t dob |
+| `Router` | Metódus+path alapú route tábla, middleware pipeline építés és futtatás |
+| `Request` | `$_GET`/`$_POST`/JSON body egységes elérése, `bearerToken()`, `ip()` |
+| `Response` | Statikus helperek JSON és fájl válaszokhoz, biztonsági fejlécekkel |
+| `View` | PHP nézetfájlok renderelése `extract()`-tel, rendelés után törli a flash session kulcsokat |
+| `Auth` | Session alapú bejelentkezés/kijelentkezés, jelszó rehash bejelentkezéskor |
+| `Csrf` | Session-kötött CSRF token generálás/ellenőrzés (`hash_equals`) |
+| `PasswordReset` | Hashelt, lejáró jelszó-visszaállító tokenek kezelése |
+| `Locale` | Cookie alapú nyelv feloldás a támogatott listából |
+| `Database` | PDO wrapper, kivétel módban, `FETCH_ASSOC` alapértelmezéssel |
+| `helpers.php` | Globális függvények: `app()`, `config()`, `view()`, `redirect()`, `old()`, `e()`, `csrf_field()`, `t()` |
+
+<Tip>
+  Nincs Facade vagy service locator absztrakció — minden globális elérés az `app()` és `config()` helpereken keresztül történik, amiket a `composer.json` `autoload.files` szakasza tölt be (`app/Core/helpers.php`).
+</Tip>
+
+## Middleware pipeline
+
+A `Router::dispatch()` a route middleware-lécából jobbról balra egy záró-lánc (`Closure`) pipeline-t épít: a lista utolsó eleme csomagolja be elsőként a vezérlőt meghívó `$core` closure-t, majd sorban kívülről befelé az összes middleware. Így a lista **elején** lévő middleware fut le elsőként, és az ő `handle()`-je dönt arról, hogy egyáltalán meghívja-e a `$next()`-et.
+
+```php
+$core = fn() => $this->invoke($route['handler'], $request);
+$pipeline = array_reduce(
+    array_reverse($route['middleware']),
+    fn($next, $middleware) => fn() => (new $middleware())->handle($request, $next),
+    $core
+);
+return $pipeline();
+```
+
+Minden middleware osztály egyetlen `handle(Request $request, callable $next): mixed` metódust implementál, konstruktor-függőség nélkül (`new $middleware()`).
+
+### Elérhető middleware-ek
+
+| Middleware | Mit csinál |
+|---|---|
+| `AuthMiddleware` | Bejelentkezést követel; ha a session felhasználója törölve lett, kilépteti és `/login`-ra irányít |
+| `GuestMiddleware` | Csak be nem jelentkezett felhasználóknak engedi az oldalt (pl. login form) |
+| `AdminMiddleware` | `403`-at ad, ha a bejelentkezett felhasználó szerepköre nem `admin` |
+| `CsrfMiddleware` | `POST` kéréseknél ellenőrzi a `_token` mezőt, eltérésnél `419`-et ad |
+| `CorsMiddleware` | Engedélyezett origin esetén CORS fejléceket állít be, `OPTIONS`-re `204`-gyel zár |
+| `RateLimitMiddleware` | Fájlalapú, IP+útvonal+időablak kulcsú kérésszám-korlátozás az API-n |
+| `ApiAuthMiddleware` | Bearer JWT dekódolása és a felhasználó létezésének ellenőrzése |
+
+Részletek és route-onkénti összerendelés: [Routing és middleware](/concepts/routing).

@@ -1,0 +1,57 @@
+---
+title: "Bevezetés a kézikönyvhöz"
+description: "Kinek szól ez a kézikönyv, és milyen jogosultsági szintek vannak"
+---
+
+Ez a fejezet a webes felület **napi használatát** mutatja be — nem a rendszer telepítését vagy a kódot. Ha fejlesztőként a rendszer felépítésére vagy az API-ra vagy kíváncsi, az [Architektúra](/concepts/architecture) és a [Gatepass API](/guides/api-integration) fejezetek erről szólnak.
+
+## Kinek szól
+
+- **Alvállalkozói kapcsolattartók**, akik az általuk képviselt cég dolgozóit rögzítik beléptetésre.
+- **Adminisztrátorok**, akik felhasználókat, vállalkozókat és alvállalkozókat vesznek fel a rendszerbe.
+
+## Szerepkörök
+
+A rendszer két szerepkört ismer, amit egy adminisztrátor állít be minden felhasználónál:
+
+<CardGroup cols={2}>
+  <Card title="Felhasználó (user)" icon="user">
+    Csak azokhoz a **vállalkozókhoz/alvállalkozókhoz** rendelt dolgozókat látja és szerkesztheti, amikhez az admin hozzárendelte. Nem fér hozzá az admin menüpontokhoz.
+  </Card>
+  <Card title="Adminisztrátor (admin)" icon="user-shield">
+    Minden dolgozót lát, függetlenül a vállalkozótól/alvállalkozótól. Hozzáfér a **Felhasználók**, **Vállalkozók** és **Alvállalkozók** menüpontokhoz is.
+  </Card>
+</CardGroup>
+
+<Note>
+  Ha egy felhasználóhoz egyetlen vállalkozó vagy alvállalkozó sincs hozzárendelve, az adott felhasználó **nem tud új dolgozót rögzíteni** — a rendszer figyelmeztetést jelenít meg a rögzítő űrlapon. Ezt egy admin tudja orvosolni a [felhasználó szerkesztésével](/manual/admin).
+</Note>
+
+## Felület felépítése
+
+A felső menüsávban mindig elérhető:
+
+- **Irányítópult** — kezdőoldal bejelentkezés után
+- **Dolgozók** — a nyilvántartás
+- Adminisztrátoroknak: **Felhasználók**, **Vállalkozók**, **Alvállalkozók**
+- **Kijelentkezés**
+- Nyelvválasztó (**HU** / **EN** / **中文**) a jobb felső sarokban
+
+A választott nyelv egy évig megjegyzésre kerül a böngészőben, minden felhasználónál külön.
+
+## Következő lépések
+
+<CardGroup cols={2}>
+  <Card title="Bejelentkezés" icon="right-to-bracket" href="/manual/bejelentkezes">
+    Bejelentkezés, elfelejtett jelszó, nyelvváltás
+  </Card>
+  <Card title="Dolgozók kezelése" icon="id-card" href="/manual/dolgozok">
+    Lista, szűrés, keresés, új dolgozó rögzítése és szerkesztése
+  </Card>
+  <Card title="Adminisztráció" icon="user-shield" href="/manual/admin">
+    Felhasználók, vállalkozók és alvállalkozók kezelése
+  </Card>
+  <Card title="Gyakori kérdések" icon="circle-question" href="/manual/gyik">
+    Hibaüzenetek és megoldásuk
+  </Card>
+</CardGroup>

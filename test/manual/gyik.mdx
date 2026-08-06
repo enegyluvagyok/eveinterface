@@ -1,0 +1,31 @@
+---
+title: "Gyakori kérdések"
+description: "Hibaüzenetek és megoldásuk a felület használata közben"
+---
+
+<AccordionGroup>
+  <Accordion title="„Hibás e-mail cím vagy jelszó” hibát kapok bejelentkezéskor">
+    Ellenőrizd, hogy nagybetű/kisbetű pontosan egyezik-e a jelszóban, és hogy nem maradt-e szóköz a mezők elején/végén. Ha biztos vagy benne, hogy a jelszó helyes, használd a [Bejelentkezés](/manual/bejelentkezes) oldal „Elfelejtett jelszó” folyamatát új jelszó beállításához.
+  </Accordion>
+  <Accordion title="Nem tudok új dolgozót rögzíteni, figyelmeztetést látok">
+    Ez azt jelenti, hogy a fiókodhoz nincs vállalkozó vagy alvállalkozó hozzárendelve. Kérj meg egy adminisztrátort, hogy a [Felhasználók](/manual/admin) menüpontban rendeljen hozzád legalább egy vállalkozót és alvállalkozót.
+  </Accordion>
+  <Accordion title="Egy dolgozónál eltűnt a „Szerkesztés” lehetőség">
+    A dolgozót már **importálta** a Gewiss Gatepass szerver — importálás után az adatok a webes felületről nem módosíthatók, ez szándékos adatvédelmi/konzisztencia intézkedés. Lásd [Dolgozók](/manual/dolgozok).
+  </Accordion>
+  <Accordion title="„419 CSRF token mismatch” hibaüzenetet kapok egy form elküldésekor">
+    Ez általában akkor fordul elő, ha egy oldalt sokáig nyitva tartottál egy másik böngészőfülön/eszközön történő újbóli bejelentkezés után, vagy ha a munkameneted lejárt. Töltsd újra az oldalt (F5), majd töltsd ki és küldd el újra a formot.
+  </Accordion>
+  <Accordion title="A fénykép feltöltése hibát dob">
+    Ellenőrizd, hogy a fájl **JPEG vagy PNG** formátumú, és **legfeljebb 5 MB** méretű. Más formátum (pl. HEIC, PDF, GIF) vagy ennél nagyobb fájl esetén a rendszer elutasítja a feltöltést.
+  </Accordion>
+  <Accordion title="Nem érkezett meg a meghívó vagy jelszó-visszaállító e-mail">
+    Ellenőrizd a spam/levélszemét mappát. Ha admin vagy, és épp most hoztál létre egy felhasználót, ellenőrizd, nem jelent-e meg a lista tetején a nyers meghívó link (ez akkor jelenik meg, ha az e-mail küldése meghiúsult) — lásd [Adminisztráció](/manual/admin).
+  </Accordion>
+  <Accordion title="404 vagy 403 hibaoldalt kapok egy linkre kattintva">
+    - **404**: a hivatkozott dolgozó/felhasználó valószínűleg nem létezik, vagy a link elavult (pl. korábban lementett könyvjelző).
+    - **403**: nincs jogosultságod a művelethez — például nem admin szerepkörű menüpontot próbálsz elérni, vagy olyan dolgozót szerkesztenél, aki nem a hozzád rendelt vállalkozóhoz/alvállalkozóhoz tartozik.
+  </Accordion>
+</AccordionGroup>
+
+Ha a fentiek egyike sem old meg egy hibát, fordulj a rendszer üzemeltetőjéhez/adminisztrátorához a hibaüzenet pontos szövegével és azzal, hogy melyik oldalon, melyik művelet közben jelentkezett.

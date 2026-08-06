@@ -15,6 +15,6 @@ final class View
         }
         extract($data, EXTR_SKIP);
         require $viewFile;
-        unset($_SESSION['_old'], $_SESSION['_errors'], $_SESSION['_flash'], $_SESSION['_invite_link']);
+        unset($_SESSION['_old'], $_SESSION['_errors'], $_SESSION['_flash'], $_SESSION['_flash_warning'], $_SESSION['_invite_link']);
     }
 }

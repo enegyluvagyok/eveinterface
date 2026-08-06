@@ -103,6 +103,8 @@
           <td class="px-4 py-3">
             <?php if ($emp['imported_at']): ?>
               <span class="rounded bg-emerald-950 px-2 py-1 text-emerald-300"><?= t('employees.status_imported') ?></span>
+            <?php elseif (!$emp['photo']): ?>
+              <span class="rounded bg-red-950 px-2 py-1 text-red-300"><?= t('employees.status_incomplete') ?></span>
             <?php else: ?>
               <span class="rounded bg-brand-gold/20 px-2 py-1 text-brand-gold"><?= t('employees.status_pending') ?></span>
             <?php endif; ?>

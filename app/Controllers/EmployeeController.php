@@ -123,7 +123,11 @@ final class EmployeeController
             'avatar' => $avatarPath,
             'created_by' => Auth::id(),
         ]);
-        $_SESSION['_flash'] = t('flash.employee_saved');
+        if ($photoPath === null) {
+            $_SESSION['_flash_warning'] = t('flash.employee_saved_incomplete');
+        } else {
+            $_SESSION['_flash'] = t('flash.employee_saved');
+        }
         redirect('/employees');
     }
 
@@ -207,7 +211,12 @@ final class EmployeeController
             'card_color' => $cardColor,
             ...$photoData,
         ]);
-        $_SESSION['_flash'] = t('flash.employee_updated');
+        $hasPhoto = ($photoData['photo'] ?? $employee['photo']) !== null;
+        if (!$hasPhoto) {
+            $_SESSION['_flash_warning'] = t('flash.employee_saved_incomplete');
+        } else {
+            $_SESSION['_flash'] = t('flash.employee_updated');
+        }
         redirect('/employees');
     }
 

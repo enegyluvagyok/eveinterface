@@ -3,7 +3,7 @@ namespace App\Models;
 
 final class Employee
 {
-    public const CARD_COLORS = ['red', 'green', 'blue'];
+    public const CARD_COLORS = ['blue', 'red', 'green'];
 
     private const LIST_SELECT = <<<SQL
         SELECT e.*, c.name AS contractor_name, s.name AS subcontractor_name, u.name AS created_by_name
@@ -209,6 +209,7 @@ final class Employee
         if ($where === null) return [];
 
         $where[] = 'e.imported_at IS NULL';
+        $where[] = 'e.photo IS NOT NULL';
         $sql = self::LIST_SELECT . ' WHERE ' . implode(' AND ', $where) . ' ORDER BY e.created_at';
         $stmt = app('db')->pdo()->prepare($sql);
         $stmt->execute($params);

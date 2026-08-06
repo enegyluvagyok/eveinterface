@@ -11,7 +11,6 @@
 <label class="block"><span class="text-sm"><?= t('employees_create.medical_fitness_until') ?></span><input class="mt-2 w-full rounded border border-brand-ink-light bg-brand-panel-strong px-4 py-3" type="date" name="medical_fitness_until" value="<?= old('medicalFitnessUntil') ?>" required></label>
 <label class="block"><span class="text-sm"><?= t('employees_create.card_color') ?></span>
   <select class="mt-2 w-full rounded border border-brand-ink-light bg-brand-panel-strong px-4 py-3" name="card_color" required>
-    <option value=""><?= t('employees_create.select_placeholder') ?></option>
     <?php foreach (\App\Models\Employee::CARD_COLORS as $color): ?>
       <option value="<?= e($color) ?>" <?= old('cardColor') === $color ? 'selected' : '' ?>><?= t('employees.card_color_' . $color) ?></option>
     <?php endforeach; ?>

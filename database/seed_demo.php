@@ -120,7 +120,7 @@ for ($i = 1; $i <= $remainingUsers; $i++) {
     }
 }
 
-echo 'Alkalmazottak létrehozása…' . PHP_EOL;
+echo 'belépőkártya igényak létrehozása…' . PHP_EOL;
 $creatorIds = array_keys($creatorScopes);
 $insert = $pdo->prepare(
     'INSERT INTO employees (contractor_id, subcontractor_id, fullname, idcard, medical_fitness_until, card_color, photo, avatar, created_by, imported_at, created_at, updated_at)
@@ -152,5 +152,5 @@ for ($i = 1; $i <= EMPLOYEE_COUNT; $i++) {
 }
 
 echo PHP_EOL . 'Kész: ' . CONTRACTOR_COUNT . ' fővállalkozó, ' . SUBCONTRACTOR_COUNT . ' alvállalkozó, '
-    . USER_COUNT . ' felhasználó, ' . EMPLOYEE_COUNT . ' alkalmazott.' . PHP_EOL;
+    . USER_COUNT . ' felhasználó, ' . EMPLOYEE_COUNT . ' belépőkártya igény.' . PHP_EOL;
 echo 'A mock felhasználók jelszava: ' . MOCK_PASSWORD . ' (pl. admin1@eve-mock.local, user1@eve-mock.local … user8@eve-mock.local)' . PHP_EOL;

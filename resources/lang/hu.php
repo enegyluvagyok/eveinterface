@@ -39,7 +39,7 @@ return [
     'dashboard.contractors_desc' => 'Fővállalkozók ID - Név párosainak kezelése.',
     'dashboard.subcontractors_desc' => 'Alvállalkozók ID - Név párosainak kezelése.',
 
-    'employees.new' => 'Új alkalmazott',
+    'employees.new' => 'Új belépőkártya igénylése',
     'employees.filter_date_from' => 'Dátum -tól',
     'employees.filter_date_to' => 'Dátum -ig',
     'employees.contractor_label' => 'Fővállalkozó',
@@ -78,10 +78,12 @@ return [
     'employees_create.card_color' => 'Kártyaszín',
     'employees_create.photo' => 'Fotó (JPG vagy PNG, max. 5 MB)',
     'employees_create.photo_edit_hint' => 'Fotó (JPG vagy PNG, max. 5 MB — hagyja üresen a jelenlegi megtartásához)',
-    'employees_create.submit' => 'Alkalmazott rögzítése',
+    'employees_create.submit' => 'Új belépőkártya igénylése',
 
     'employees_edit.title_tag' => 'Alkalmazott szerkesztése',
     'employees.already_imported' => 'Az alkalmazott már importálva lett, ezért nem szerkeszthető.',
+    'employees.delete_link' => 'Törlés',
+    'employees.delete_confirm' => 'Biztosan törlöd ezt az alkalmazottat? Ez a művelet nem vonható vissza.',
 
     'admin_users.new' => 'Új felhasználó',
     'admin_users.col_role' => 'Szerepkör',
@@ -144,6 +146,7 @@ return [
     'flash.user_updated' => 'Felhasználó frissítve.',
     'flash.employee_saved' => 'Alkalmazott rögzítve.',
     'flash.employee_updated' => 'Alkalmazott frissítve.',
+    'flash.employee_deleted' => 'Alkalmazott törölve.',
     'flash.contractor_created' => 'Fővállalkozó létrehozva.',
     'flash.subcontractor_created' => 'Alvállalkozó létrehozva.',
     'flash.password_reset_success' => 'A jelszó sikeresen megváltozott, be vagy jelentkezve.',

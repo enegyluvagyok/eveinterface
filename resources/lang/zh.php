@@ -82,6 +82,8 @@ return [
 
     'employees_edit.title_tag' => '编辑员工',
     'employees.already_imported' => '该员工已导入，无法再编辑。',
+    'employees.delete_link' => '删除',
+    'employees.delete_confirm' => '确定要删除该员工吗？此操作无法撤销。',
 
     'admin_users.new' => '新增用户',
     'admin_users.col_role' => '角色',
@@ -144,6 +146,7 @@ return [
     'flash.user_updated' => '用户已更新。',
     'flash.employee_saved' => '员工已登记。',
     'flash.employee_updated' => '员工已更新。',
+    'flash.employee_deleted' => '员工已删除。',
     'flash.contractor_created' => '总承包商已创建。',
     'flash.subcontractor_created' => '分包商已创建。',
     'flash.password_reset_success' => '密码已成功修改，您已登录。',

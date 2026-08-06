@@ -82,6 +82,8 @@ return [
 
     'employees_edit.title_tag' => 'Edit employee',
     'employees.already_imported' => 'This employee has already been imported and can no longer be edited.',
+    'employees.delete_link' => 'Delete',
+    'employees.delete_confirm' => 'Are you sure you want to delete this employee? This action cannot be undone.',
 
     'admin_users.new' => 'New user',
     'admin_users.col_role' => 'Role',
@@ -144,6 +146,7 @@ return [
     'flash.user_updated' => 'User updated.',
     'flash.employee_saved' => 'Employee registered.',
     'flash.employee_updated' => 'Employee updated.',
+    'flash.employee_deleted' => 'Employee deleted.',
     'flash.contractor_created' => 'Contractor created.',
     'flash.subcontractor_created' => 'Subcontractor created.',
     'flash.password_reset_success' => 'Your password has been changed and you\'re now logged in.',

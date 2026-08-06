@@ -38,4 +38,5 @@ $router->get('/employees/create', [EmployeeController::class, 'create'], [AuthMi
 $router->post('/employees', [EmployeeController::class, 'store'], [AuthMiddleware::class, CsrfMiddleware::class]);
 $router->get('/employees/edit', [EmployeeController::class, 'edit'], [AuthMiddleware::class]);
 $router->post('/employees/edit', [EmployeeController::class, 'update'], [AuthMiddleware::class, CsrfMiddleware::class]);
+$router->post('/employees/delete', [EmployeeController::class, 'destroy'], [AuthMiddleware::class, CsrfMiddleware::class]);
 $router->get('/employees/photo', [EmployeeController::class, 'photo'], [AuthMiddleware::class]);

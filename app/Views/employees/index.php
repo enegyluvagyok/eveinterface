@@ -109,7 +109,14 @@
           </td>
           <td class="px-4 py-3">
             <?php if (!$emp['imported_at']): ?>
-              <a href="/employees/edit?id=<?= e($emp['id']) ?>" class="text-brand-gold hover:underline"><?= t('admin_users.edit_link') ?></a>
+              <div class="flex items-center gap-3">
+                <a href="/employees/edit?id=<?= e($emp['id']) ?>" class="text-brand-gold hover:underline"><?= t('admin_users.edit_link') ?></a>
+                <form method="post" action="/employees/delete" data-confirm="<?= e(t('employees.delete_confirm')) ?>">
+                  <?= csrf_field() ?>
+                  <input type="hidden" name="id" value="<?= e($emp['id']) ?>">
+                  <button type="submit" class="text-red-400 hover:text-red-300 hover:underline"><?= t('employees.delete_link') ?></button>
+                </form>
+              </div>
             <?php endif; ?>
           </td>
         </tr>

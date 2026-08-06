@@ -176,6 +176,12 @@ final class Employee
         $stmt->execute($params);
     }
 
+    public static function delete(int $id): void
+    {
+        $stmt = app('db')->pdo()->prepare('DELETE FROM employees WHERE id = :id AND imported_at IS NULL');
+        $stmt->execute(['id' => $id]);
+    }
+
     public static function create(array $data): int
     {
         $stmt = app('db')->pdo()->prepare(

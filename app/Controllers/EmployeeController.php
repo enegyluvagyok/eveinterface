@@ -134,7 +134,7 @@ final class EmployeeController
         if (!$employee) { http_response_code(404); view('errors.404'); return; }
 
         $scope = User::accessScope(Auth::user());
-        if ($blocked = $this->editBlockReason($employee, $scope)) {
+        if ($blocked = $this->mutationBlockReason($employee, $scope)) {
             http_response_code(403);
             view('errors.403', ['message' => $blocked]);
             return;
@@ -154,7 +154,7 @@ final class EmployeeController
         if (!$employee) { http_response_code(404); view('errors.404'); exit; }
 
         $scope = User::accessScope(Auth::user());
-        if ($blocked = $this->editBlockReason($employee, $scope)) {
+        if ($blocked = $this->mutationBlockReason($employee, $scope)) {
             http_response_code(403);
             view('errors.403', ['message' => $blocked]);
             exit;
@@ -211,8 +211,27 @@ final class EmployeeController
         redirect('/employees');
     }
 
-    /** @return ?string translated reason the edit is blocked, or null if allowed */
-    private function editBlockReason(array $employee, array $scope): ?string
+    public function destroy(Request $request): never
+    {
+        $id = (int)$request->input('id');
+        $employee = Employee::find($id);
+        if (!$employee) { http_response_code(404); view('errors.404'); exit; }
+
+        $scope = User::accessScope(Auth::user());
+        if ($blocked = $this->mutationBlockReason($employee, $scope)) {
+            http_response_code(403);
+            view('errors.403', ['message' => $blocked]);
+            exit;
+        }
+
+        $this->deletePhotoFiles($employee);
+        Employee::delete($id);
+        $_SESSION['_flash'] = t('flash.employee_deleted');
+        redirect('/employees');
+    }
+
+    /** @return ?string translated reason the edit/delete is blocked, or null if allowed */
+    private function mutationBlockReason(array $employee, array $scope): ?string
     {
         if ($employee['imported_at'] !== null) return t('employees.already_imported');
         if (!$this->inScope((int)$employee['contractor_id'], $scope['allowed_contractor_ids'] ?? null)) return t('errors.403_desc');
@@ -245,6 +264,16 @@ final class EmployeeController
     {
         $date = \DateTime::createFromFormat('Y-m-d', $value);
         return $date !== false && $date->format('Y-m-d') === $value;
+    }
+
+    private function deletePhotoFiles(array $employee): void
+    {
+        $baseDir = dirname(__DIR__, 2) . '/storage/uploads/';
+        foreach ([$employee['photo'], $employee['avatar']] as $relative) {
+            if (!$relative) continue;
+            $path = $baseDir . $relative;
+            if (is_file($path)) @unlink($path);
+        }
     }
 
     /** @return array{0: ?string, 1: ?string} relative storage paths [photo, avatar] */

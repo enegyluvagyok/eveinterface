@@ -42,6 +42,13 @@
 
   document.addEventListener('submit', function (e) {
     if (e.defaultPrevented) return;
+    var form = e.target;
+    if (form instanceof HTMLFormElement && form.hasAttribute('data-confirm')) {
+      if (!window.confirm(form.getAttribute('data-confirm'))) {
+        e.preventDefault();
+        return;
+      }
+    }
     start();
   });
 

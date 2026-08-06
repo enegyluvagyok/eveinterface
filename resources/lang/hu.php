@@ -29,7 +29,7 @@ return [
     'role.user' => 'Felhasználó',
 
     'home.title_tag' => 'Kezdőlap',
-    'home.title' => 'Gatepass Interface alvállalkozói regisztrációhoz.',
+    'home.title' => 'Köszöntjük a Gewiss Guard Kft. belépőkártya igénylési rendszerében.',
     'home.description' => 'Alvállalkozói kapcsolattartók itt rögzíthetik a beléptetésre váró személyeket, amit a helyi Gewiss Gatepass szerver API-n keresztül tölt be és importál.',
 
     'dashboard.welcome' => 'Üdv',
